@@ -26,11 +26,9 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
         binding = FragmentOrdersBinding.bind(view)
 
         adapter = OrdersAdapter(emptyList()) { order ->
-            if (order.status == "IN_DELIVERY" || order.status == "READY_FOR_PICKUP") {
-                 findNavController().navigate(R.id.action_orders_to_track)
-            } else {
-                 Toast.makeText(context, "Order is ${order.status}", Toast.LENGTH_SHORT).show()
-            }
+            // Show order details
+            val detailsSheet = OrderDetailsBottomSheet(order)
+            detailsSheet.show(parentFragmentManager, "OrderDetailsBottomSheet")
         }
         
         binding.rvOrders.layoutManager = LinearLayoutManager(context)

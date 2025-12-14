@@ -1,80 +1,100 @@
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardElevation="0dp"
-    app:cardCornerRadius="12dp"
-    app:cardBackgroundColor="@color/uber_white">
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardElevation="3dp"
+    app:cardCornerRadius="16dp"
+    app:cardBackgroundColor="@color/surface"
+    android:clickable="true"
+    android:focusable="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <androidx.cardview.widget.CardView
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="0dp">
-
+            android:layout_height="160dp">
+            
             <ImageView
                 android:id="@+id/ivRestaurant"
                 android:layout_width="match_parent"
-                android:layout_height="140dp"
+                android:layout_height="match_parent"
                 android:scaleType="centerCrop"
-                android:src="@android:drawable/ic_menu_gallery" />
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:src="@android:drawable/ic_menu_gallery" 
+                android:background="@color/background"/>
+            
+            <ImageButton
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_gravity="end|top"
-                android:layout_margin="8dp"
+                android:layout_margin="12dp"
+                android:background="@drawable/bg_quantity_selector"
                 android:src="@android:drawable/ic_menu_save"
-                app:tint="@color/uber_white" />
-
-        </androidx.cardview.widget.CardView>
+                app:tint="@color/text_primary"
+                android:padding="6dp"/>
+        </FrameLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="4dp">
+            android:padding="12dp">
 
             <TextView
                 android:id="@+id/tvName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textSize="14sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="@color/uber_black"
+                android:textColor="@color/text_primary"
                 android:text="Restaurant Name"
                 android:maxLines="1"
                 android:ellipsize="end" />
 
-            <TextView
-                android:id="@+id/tvDescription"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="$ • Japanese • Sushi"
-                android:textSize="12sp"
-                android:textColor="@color/uber_text_secondary"
-                android:maxLines="1"
-                android:ellipsize="end" />
+                <TextView
+                    android:id="@+id/tvDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="$$ • Japanese • Sushi"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
 
-            <TextView
+            <!-- Single line for meta data to ensure safety on small grid items -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="20-30 min • $0.99 Delivery Fee"
-                android:textSize="12sp"
-                android:textColor="@color/uber_text_secondary" 
-                android:maxLines="1"
-                android:ellipsize="end"/>
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@android:drawable/ic_menu_recent_history"
+                    app:tint="@color/primary"
+                    android:layout_marginEnd="6dp"/>
+                
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="20-30 min"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:maxLines="1"
+                    android:ellipsize="end"/>
+                    
+            </LinearLayout>
 
         </LinearLayout>
 
     </LinearLayout>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

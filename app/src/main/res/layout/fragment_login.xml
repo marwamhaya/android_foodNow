@@ -10,7 +10,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Uber Eats"
+        android:text="Food Now"
         android:textSize="32sp"
         android:textStyle="bold"
         android:textColor="@color/uber_green"
@@ -77,7 +77,7 @@
         android:id="@+id/tvRegister"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="New to Uber Eats? Register"
+        android:text="New to Restaurants? Register"
         android:textColor="@color/uber_green"
         android:gravity="center"
         android:layout_marginTop="24dp"

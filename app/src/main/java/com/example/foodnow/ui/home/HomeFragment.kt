@@ -11,6 +11,11 @@ import com.example.foodnow.FoodNowApp
 import com.example.foodnow.R
 import com.example.foodnow.databinding.FragmentHomeBinding
 import com.example.foodnow.ui.ViewModelFactory
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import com.example.foodnow.ui.menu.CartBottomSheet
+import com.example.foodnow.ui.menu.MenuViewModel
+import com.example.foodnow.utils.CartManager
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
@@ -18,6 +23,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var adapter: RestaurantAdapter
     
     private val viewModel: HomeViewModel by viewModels {
+        ViewModelFactory((requireActivity().application as FoodNowApp).repository)
+    }
+
+    private val menuViewModel: MenuViewModel by viewModels {
         ViewModelFactory((requireActivity().application as FoodNowApp).repository)
     }
 
@@ -49,6 +58,24 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             }.onFailure {
                 binding.tvError.text = "Error: ${it.message}"
                 binding.tvError.visibility = View.VISIBLE
+            }
+        }
+
+        // Observe CartManager to show global cart button
+        viewLifecycleOwner.lifecycleScope.launch {
+            CartManager.cartItems.collect { cartItems ->
+                val restaurantId = CartManager.getCurrentRestaurantId()
+                if (cartItems.isNotEmpty() && restaurantId != null) {
+                    binding.layoutCart.visibility = View.VISIBLE
+                    val total = CartManager.getTotal()
+                    binding.btnPlaceOrder.text = "View Cart (${cartItems.sumOf { it.quantity }}) - ${String.format("%.2f", total)}€"
+                    binding.btnPlaceOrder.setOnClickListener {
+                        val cartSheet = CartBottomSheet(menuViewModel, restaurantId)
+                        cartSheet.show(parentFragmentManager, "CartBottomSheet")
+                    }
+                } else {
+                    binding.layoutCart.visibility = View.GONE
+                }
             }
         }
     }

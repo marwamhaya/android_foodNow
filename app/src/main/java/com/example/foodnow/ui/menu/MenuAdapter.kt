@@ -13,7 +13,8 @@ import java.text.NumberFormat
 import java.util.Locale
 
 class MenuAdapter(
-    private var menuItems: List<MenuItemResponse>
+    private var menuItems: List<MenuItemResponse>,
+    private val onItemClick: (MenuItemResponse) -> Unit
 ) : RecyclerView.Adapter<MenuAdapter.MenuViewHolder>() {
 
     class MenuViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -32,7 +33,7 @@ class MenuAdapter(
         val item = menuItems[position]
         holder.tvName.text = item.name
         holder.tvDescription.text = item.description ?: ""
-        holder.tvPrice.text = NumberFormat.getCurrencyInstance(Locale.US).format(item.price)
+        holder.tvPrice.text = "${String.format("%.2f", item.price)} DH"
 
         if (!item.imageUrl.isNullOrEmpty()) {
             Glide.with(holder.itemView.context)
@@ -41,6 +42,10 @@ class MenuAdapter(
                 .into(holder.ivDish)
         } else {
             holder.ivDish.setImageResource(android.R.drawable.ic_menu_gallery)
+        }
+
+        holder.itemView.setOnClickListener {
+            onItemClick(item)
         }
     }
 

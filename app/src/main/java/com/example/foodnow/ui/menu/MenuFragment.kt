@@ -9,7 +9,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.foodnow.FoodNowApp
 import com.example.foodnow.R
 import com.example.foodnow.databinding.FragmentMenuBinding
+import androidx.lifecycle.lifecycleScope
 import com.example.foodnow.ui.ViewModelFactory
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collect
 
 class MenuFragment : Fragment(R.layout.fragment_menu) {
 
@@ -30,7 +33,11 @@ class MenuFragment : Fragment(R.layout.fragment_menu) {
             return
         }
 
-        adapter = MenuAdapter(emptyList())
+        adapter = MenuAdapter(emptyList()) { item ->
+            // Open Details Bottom Sheet
+            val bottomSheet = ItemDetailsBottomSheet(item, restaurantId)
+            bottomSheet.show(parentFragmentManager, "ItemDetailsBottomSheet")
+        }
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
         binding.recyclerView.adapter = adapter
 
@@ -44,6 +51,34 @@ class MenuFragment : Fragment(R.layout.fragment_menu) {
             }.onFailure {
                 Toast.makeText(context, "Error: ${it.message}", Toast.LENGTH_LONG).show()
             }
+        }
+
+        // Observe CartManager instead of ViewModel.cart
+        viewLifecycleOwner.lifecycleScope.launch {
+            com.example.foodnow.utils.CartManager.cartItems.collect { cartItems ->
+                 if (cartItems.isNotEmpty() && com.example.foodnow.utils.CartManager.getCurrentRestaurantId() == restaurantId) {
+                    binding.layoutCart.visibility = View.VISIBLE
+                    val total = com.example.foodnow.utils.CartManager.getTotal()
+                    binding.btnPlaceOrder.text = "View Cart (${cartItems.sumOf { it.quantity }}) - ${String.format("%.2f", total)}€"
+                    binding.btnPlaceOrder.setOnClickListener {
+                        val cartSheet = CartBottomSheet(viewModel, restaurantId)
+                        cartSheet.show(parentFragmentManager, "CartBottomSheet")
+                    }
+                } else {
+                    binding.layoutCart.visibility = View.GONE
+                }
+            }
+        }
+
+        viewModel.orderResult.observe(viewLifecycleOwner) { result ->
+             result.onSuccess {
+                 Toast.makeText(context, "Order Placed! ID: ${it.id}", Toast.LENGTH_LONG).show()
+                 // Navigate to Orders or Track
+                 // findNavController().navigate(R.id.action_menu_to_orders) // If action exists
+                 requireActivity().onBackPressedDispatcher.onBackPressed() // Go back for now
+             }.onFailure {
+                 Toast.makeText(context, "Order Failed: ${it.message}", Toast.LENGTH_LONG).show()
+             }
         }
     }
 }

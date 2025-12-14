@@ -35,7 +35,7 @@ class OrdersAdapter(private var orders: List<Order>, private val onClick: (Order
         holder.tvOrderDate.text = order.createdAt.take(10) 
 
         val itemCount = order.items.sumOf { it.quantity }
-        holder.tvOrderItems.text = "$itemCount items • $${order.totalAmount}"
+        holder.tvOrderItems.text = "$itemCount items • ${String.format("%.2f", order.totalAmount)} DH"
 
         holder.itemView.setOnClickListener { onClick(order) }
     }

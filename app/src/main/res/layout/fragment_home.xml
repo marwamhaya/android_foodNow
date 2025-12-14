@@ -4,74 +4,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/uber_white">
+    android:background="@color/uber_white"
+    android:padding="16dp">
 
-
-    <!-- Filters Mock -->
-    <HorizontalScrollView
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="none"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="16dp"
-        android:clipToPadding="false">
+        android:text="Restaurants"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:gravity="start"
+        android:layout_marginBottom="16dp"
+        android:textColor="@color/uber_black" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Convenience"
-                android:background="@drawable/ic_launcher_background"
-                android:padding="8dp"
-                android:layout_marginEnd="8dp"
-                android:visibility="gone"/> 
-                <!-- Using gone for now as we don't include drwables/chips logic-->
-            
-             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Sort"
-                android:textSize="14sp"
-                android:textColor="@color/uber_black"
-                android:layout_marginEnd="16dp"
-                android:textStyle="bold"/>
-
-             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Price"
-                android:textSize="14sp"
-                android:textColor="@color/uber_black"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:paddingTop="6dp"
-                android:paddingBottom="6dp"
-                android:background="@android:color/darker_gray"
-                android:backgroundTint="#F0F0F0" 
-                android:layout_marginEnd="8dp"/>
-                
-                <!-- Just using basic textviews to simulate chips for layout structure -->
-             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Dietary"
-                android:textSize="14sp"
-                android:textColor="@color/uber_black"
-                 android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:paddingTop="6dp"
-                android:paddingBottom="6dp"
-                android:background="@android:color/darker_gray"
-                android:backgroundTint="#F0F0F0" 
-                android:layout_marginEnd="8dp"/>
-                
-        </LinearLayout>
-    </HorizontalScrollView>
+    <!-- Filters Mock Removed -->
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -101,6 +48,28 @@
             android:text="Error loading restaurants"
             android:visibility="gone" />
 
+        <LinearLayout
+            android:id="@+id/layoutCart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="vertical"
+            android:background="@color/uber_white"
+            android:elevation="8dp"
+            android:padding="16dp"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/btnPlaceOrder"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="View Cart"
+                android:textAllCaps="false"
+                android:backgroundTint="@color/uber_green"
+                android:textColor="@color/uber_white"
+                android:textSize="18sp"
+                app:cornerRadius="4dp" />
+        </LinearLayout>
     </FrameLayout>
 
 </LinearLayout>

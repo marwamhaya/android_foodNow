@@ -43,7 +43,22 @@ data class MenuItemResponse(
     val price: BigDecimal,
     val imageUrl: String?,
     val category: String?,
-    val isAvailable: Boolean
+    val isAvailable: Boolean,
+    val optionGroups: List<MenuOptionGroupResponse> = emptyList()
+)
+
+data class MenuOptionGroupResponse(
+    val id: Long,
+    val name: String,
+    val isRequired: Boolean,
+    val isMultiple: Boolean,
+    val options: List<MenuOptionResponse>
+)
+
+data class MenuOptionResponse(
+    val id: Long,
+    val name: String,
+    val extraPrice: BigDecimal
 )
 
 data class MenuItemRequest(
@@ -140,5 +155,34 @@ data class OrderItem(
     val id: Long,
     val menuItemName: String,
     val quantity: Int,
+    @SerializedName("unitPrice")
+    val price: BigDecimal,
+    val selectedOptions: List<SelectedOptionResponse>? = emptyList()
+)
+
+data class SelectedOptionResponse(
+    val name: String,
     val price: BigDecimal
+)
+
+data class OrderRequest(
+    val restaurantId: Long,
+    val items: List<OrderItemRequest>,
+    val deliveryAddress: String? = null
+)
+
+data class OrderItemRequest(
+    val menuItemId: Long,
+    val quantity: Int,
+    val selectedOptionIds: List<Long> = emptyList()
+)
+
+data class PaymentRequest(
+    val amount: BigDecimal,
+    val paymentMethod: String
+)
+
+data class PaymentResponse(
+    val status: String,
+    val message: String
 )

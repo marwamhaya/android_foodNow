@@ -40,6 +40,8 @@ class Repository(private val apiService: ApiService, private val tokenManager: T
     suspend fun getMenuItems(restaurantId: Long) = apiService.getMenuItems(restaurantId)
 
     suspend fun getMyOrders() = apiService.getMyOrders()
+    
+    suspend fun createOrder(request: OrderRequest) = apiService.createOrder(request)
 
     suspend fun getUserProfile() = apiService.getUserProfile()
 
@@ -74,7 +76,9 @@ class Repository(private val apiService: ApiService, private val tokenManager: T
     suspend fun getAllRestaurantsAdmin() = apiService.getAllRestaurantsAdmin()
     suspend fun toggleUserStatus(id: Long) = apiService.toggleUserStatus(id)
     suspend fun toggleRestaurantStatus(id: Long) = apiService.toggleRestaurantStatus(id)
-    suspend fun getRestaurantOrders(id: Long) = apiService.getRestaurantOrders(id) // Returns PageResponse, we might need content
+    suspend fun getRestaurantOrders(id: Long) = apiService.getRestaurantOrders(id) 
+    
+    suspend fun simulatePayment(request: PaymentRequest) = apiService.simulatePayment(request)
 
     fun saveAuth(token: String, role: String) {
         tokenManager.saveToken(token)

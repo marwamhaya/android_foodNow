@@ -25,6 +25,9 @@ interface ApiService {
     @GET("/api/orders/client")
     suspend fun getMyOrders(): Response<List<Order>>
 
+    @POST("/api/orders")
+    suspend fun createOrder(@Body request: OrderRequest): Response<Order>
+
     @GET("/api/users/me")
     suspend fun getUserProfile(): Response<AuthResponse> // Using AuthResponse as User DTO for now
 
@@ -110,4 +113,7 @@ interface ApiService {
 
     @GET("/api/restaurants/{id}/orders")
     suspend fun getRestaurantOrders(@Path("id") id: Long): Response<PageResponse<Order>>
+
+    @POST("/api/payments/simulate")
+    suspend fun simulatePayment(@Body request: PaymentRequest): Response<PaymentResponse>
 }

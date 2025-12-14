@@ -3,15 +3,18 @@
 
     <style name="Theme.Foodnow" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/uber_green</item>
-        <item name="colorPrimaryVariant">@color/uber_black</item>
-        <item name="colorOnPrimary">@color/uber_white</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primary_variant</item>
+        <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/uber_black</item>
-        <item name="colorSecondaryVariant">@color/uber_black</item>
-        <item name="colorOnSecondary">@color/uber_white</item>
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorSecondaryVariant">@color/secondary_variant</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Backgrounds -->
+        <item name="android:windowBackground">@color/background</item>
+        <item name="colorSurface">@color/surface</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor">@color/uber_white</item>
+        <item name="android:statusBarColor">@color/background</item>
         <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit Restaurant"
+            android:textSize="24sp"
+            android:layout_marginBottom="16dp"/>
+
+        <EditText android:id="@+id/etName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Restaurant Name"/>
+        <EditText android:id="@+id/etAddress" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Address"/>
+        <EditText android:id="@+id/etPhone" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Phone" android:inputType="phone"/>
+        <EditText android:id="@+id/etDesc" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Description"/>
+        <EditText android:id="@+id/etImageUrl" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Image URL (Optional)"/>
+        
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Owner Info" android:textStyle="bold" android:layout_marginTop="16dp"/>
+        <EditText android:id="@+id/etOwnerName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Owner Name"/>
+        <EditText android:id="@+id/etOwnerEmail" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Owner Email" android:inputType="textEmailAddress"/>
+        <EditText android:id="@+id/etOwnerPass" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="New Password (leave empty to keep)" android:inputType="textPassword"/>
+        <EditText android:id="@+id/etOwnerPhone" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Owner Phone" android:inputType="phone"/>
+
+        <Button
+            android:id="@+id/btnUpdate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Update Restaurant"
+            android:layout_marginTop="24dp"/>
+
+    </LinearLayout>
+</ScrollView>

@@ -32,8 +32,10 @@ class RestaurantAdapter(
         holder.tvDescription.text = restaurant.description ?: "No description available"
         
         if (!restaurant.imageUrl.isNullOrEmpty()) {
+            val fullUrl = if (restaurant.imageUrl.startsWith("http")) restaurant.imageUrl 
+                           else "http://10.0.2.2:8080${restaurant.imageUrl}"
             Glide.with(holder.itemView.context)
-                .load(restaurant.imageUrl)
+                .load(fullUrl)
                 .placeholder(android.R.drawable.ic_menu_gallery)
                 .into(holder.ivRestaurant)
         } else {

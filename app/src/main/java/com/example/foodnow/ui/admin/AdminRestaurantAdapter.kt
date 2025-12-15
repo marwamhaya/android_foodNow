@@ -5,6 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.ImageView
+import com.bumptech.glide.Glide
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodnow.R
 import com.example.foodnow.data.RestaurantResponse
@@ -19,6 +21,7 @@ class AdminRestaurantAdapter(
         val tvName: TextView = itemView.findViewById(R.id.tvRestoName)
         val tvStatus: TextView = itemView.findViewById(R.id.tvRestoStatus)
         val btnToggle: Button = itemView.findViewById(R.id.btnToggleStatus)
+        val ivImage: ImageView = itemView.findViewById(R.id.ivRestoImage)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -31,6 +34,15 @@ class AdminRestaurantAdapter(
         holder.tvName.text = item.name
         holder.tvStatus.text = if (item.isActive) "Active" else "Inactive"
         holder.btnToggle.text = if (item.isActive) "Disable" else "Enable"
+
+        if (!item.imageUrl.isNullOrEmpty()) {
+            Glide.with(holder.itemView.context)
+                .load(item.imageUrl)
+                .centerCrop()
+                .into(holder.ivImage)
+        } else {
+             holder.ivImage.setImageResource(R.drawable.ic_launcher_background) // Placeholder
+        }
         
         holder.btnToggle.setOnClickListener { onToggleClick(item) }
         holder.itemView.setOnClickListener { onItemClick(item) }

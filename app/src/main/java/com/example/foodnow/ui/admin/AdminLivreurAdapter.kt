@@ -7,11 +7,12 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodnow.R
-import com.example.foodnow.data.User
+import com.example.foodnow.data.LivreurResponse
 
 class AdminLivreurAdapter(
-    private var users: List<User>,
-    private val onToggleClick: (User) -> Unit
+    private var livreurs: List<LivreurResponse>,
+    private val onToggleClick: (LivreurResponse) -> Unit,
+    private val onItemClick: (LivreurResponse) -> Unit
 ) : RecyclerView.Adapter<AdminLivreurAdapter.ViewHolder>() {
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -21,24 +22,25 @@ class AdminLivreurAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        // reuse layout or create item_admin_livreur
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_admin_livreur, parent, false)
         return ViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = users[position]
-        holder.tvName.text = item.fullName + " (${item.email})"
+        val item = livreurs[position]
+        // item.fullName might not exist on LivreurResponse, it has fullName directly
+        holder.tvName.text = "${item.fullName} (${item.vehicleType})"
         holder.tvStatus.text = if (item.isActive) "Active" else "Inactive"
         holder.btnToggle.text = if (item.isActive) "Disable" else "Enable"
         
         holder.btnToggle.setOnClickListener { onToggleClick(item) }
+        holder.itemView.setOnClickListener { onItemClick(item) }
     }
 
-    override fun getItemCount() = users.size
+    override fun getItemCount() = livreurs.size
 
-    fun updateData(newData: List<User>) {
-        users = newData
+    fun updateData(newData: List<LivreurResponse>) {
+        livreurs = newData
         notifyDataSetChanged()
     }
 }

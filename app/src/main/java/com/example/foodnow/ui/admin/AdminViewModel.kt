@@ -23,6 +23,27 @@ class AdminViewModel(private val repository: Repository) : ViewModel() {
     private val _restaurantOrders = MutableLiveData<Result<List<com.example.foodnow.data.Order>>>()
     val restaurantOrders: LiveData<Result<List<com.example.foodnow.data.Order>>> = _restaurantOrders
 
+    private val _restaurantDetails = MutableLiveData<Result<RestaurantResponse>>()
+    val restaurantDetails: LiveData<Result<RestaurantResponse>> = _restaurantDetails
+
+    fun getRestaurantById(id: Long) {
+        viewModelScope.launch {
+            try {
+                // Using restaurant endpoint which seems open or we need specific admin endpoint?
+                // Assuming standard endpoint works or we need to add one to repo.
+                // Repository usually has getRestaurantById from user side which is public.
+                val response = repository.getRestaurantById(id)
+                if (response.isSuccessful && response.body() != null) {
+                    _restaurantDetails.value = Result.success(response.body()!!)
+                } else {
+                    _restaurantDetails.value = Result.failure(Exception("Error loading details"))
+                }
+            } catch (e: Exception) {
+                _restaurantDetails.value = Result.failure(e)
+            }
+        }
+    }
+
     fun getRestaurantOrders(restaurantId: Long) {
         viewModelScope.launch {
             try {
@@ -96,6 +117,7 @@ class AdminViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
+
     fun createLivreur(request: LivreurRequest, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
             try {
@@ -109,6 +131,114 @@ class AdminViewModel(private val repository: Repository) : ViewModel() {
                 }
             } catch (e: Exception) {
                  onError("Error: ${e.message}")
+            }
+        }
+    }
+
+    fun resetUserPassword(id: Long, password: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val response = repository.resetUserPassword(id, password)
+                if (response.isSuccessful) {
+                    onSuccess()
+                } else {
+                    onError("Failed to reset password")
+                }
+            } catch (e: Exception) {
+                onError("Error: ${e.message}")
+            }
+        }
+    }
+
+    private val _livreurs = MutableLiveData<Result<List<com.example.foodnow.data.LivreurResponse>>>()
+    val livreurs: LiveData<Result<List<com.example.foodnow.data.LivreurResponse>>> = _livreurs
+
+    fun getAllLivreurs() {
+        viewModelScope.launch {
+            try {
+                val response = repository.getAllLivreurs()
+                if (response.isSuccessful && response.body() != null) {
+                    _livreurs.value = Result.success(response.body()!!)
+                } else {
+                    _livreurs.value = Result.failure(Exception("Error loading livreurs"))
+                }
+            } catch (e: Exception) {
+                _livreurs.value = Result.failure(e)
+            }
+        }
+    }
+
+    fun updateRestaurant(id: Long, request: RestaurantRequest, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val response = repository.updateRestaurant(id, request)
+                if (response.isSuccessful) {
+                    onSuccess()
+                    getAllRestaurants() // Refresh list
+                } else {
+                    onError("Failed to update restaurant: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                onError("Error: ${e.message}")
+            }
+        }
+    }
+
+    private val _livreurDetails = MutableLiveData<Result<com.example.foodnow.data.LivreurResponse>>()
+    val livreurDetails: LiveData<Result<com.example.foodnow.data.LivreurResponse>> = _livreurDetails
+
+    fun getLivreurById(id: Long) {
+        viewModelScope.launch {
+            try {
+                val response = repository.getLivreurById(id)
+                if (response.isSuccessful && response.body() != null) {
+                    _livreurDetails.value = Result.success(response.body()!!)
+                } else {
+                    _livreurDetails.value = Result.failure(Exception("Error loading livreur details"))
+                }
+            } catch (e: Exception) {
+                _livreurDetails.value = Result.failure(e)
+            }
+        }
+    }
+
+    fun updateLivreur(id: Long, request: LivreurRequest, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+             try {
+                val response = repository.updateLivreur(id, request)
+                if (response.isSuccessful) {
+                    onSuccess()
+                    getAllUsers() // Refresh list (Note: getAllUsers returns all users, might need filtering logic again in fragment)
+                } else {
+                    onError("Failed to update livreur: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                onError("Error: ${e.message}")
+            }
+        }
+    }
+
+    fun toggleLivreurStatus(id: Long) {
+        viewModelScope.launch {
+            repository.toggleLivreurStatus(id)
+            getAllLivreurs()
+        }
+    }
+
+    private val _dailyOrderCount = MutableLiveData<Result<Long>>()
+    val dailyOrderCount: LiveData<Result<Long>> = _dailyOrderCount
+
+    fun getDailyOrderCount(id: Long) {
+        viewModelScope.launch {
+            try {
+                val response = repository.getDailyOrderCount(id)
+                if (response.isSuccessful && response.body() != null) {
+                    _dailyOrderCount.value = Result.success(response.body()!!)
+                } else {
+                    _dailyOrderCount.value = Result.failure(Exception("Error loading count"))
+                }
+            } catch (e: Exception) {
+                _dailyOrderCount.value = Result.failure(e)
             }
         }
     }

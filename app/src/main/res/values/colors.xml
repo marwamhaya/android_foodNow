@@ -9,6 +9,7 @@
     <color name="background">#F8F9FA</color>
     <color name="surface">#FFFFFF</color>
     <color name="error">#FF3B30</color>
+    <color name="success">#34C759</color>
 
     <color name="text_primary">#1A1D26</color>
     <color name="text_secondary">#9A9FAE</color>

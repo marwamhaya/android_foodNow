@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.foodnow.data.AuthResponse
+import com.example.foodnow.data.ChangePasswordRequest
 import com.example.foodnow.data.Repository
 import kotlinx.coroutines.launch
 
@@ -29,10 +30,10 @@ class AccountViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
-    fun changePassword(newPassword: String) {
+    fun changePassword(current: String, new: String) {
         viewModelScope.launch {
             try {
-                val response = repository.changePassword(newPassword)
+                val response = repository.changePassword(current, new)
                 if (response.isSuccessful) {
                     _actionResult.value = Result.success("Password changed")
                 } else {

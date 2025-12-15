@@ -42,7 +42,8 @@ class CreateRestaurantFragment : Fragment(R.layout.fragment_create_restaurant) {
                 ownerFullName = etOwnerName.text.toString(),
                 ownerEmail = etOwnerEmail.text.toString(),
                 ownerPassword = etOwnerPass.text.toString(),
-                ownerPhoneNumber = etOwnerPhone.text.toString()
+                ownerPhoneNumber = etOwnerPhone.text.toString(),
+                openingHours = null
             )
             
             viewModel.createRestaurant(req, 

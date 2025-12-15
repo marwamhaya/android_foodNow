@@ -11,6 +11,7 @@ import com.example.foodnow.data.MenuItemResponse
 
 class MenuItemAdapter(
     private var items: List<MenuItemResponse>,
+    private val onItemClick: (MenuItemResponse) -> Unit,
     private val onEditClick: (MenuItemResponse) -> Unit,
     private val onDeleteClick: (MenuItemResponse) -> Unit
 ) : RecyclerView.Adapter<MenuItemAdapter.MenuItemViewHolder>() {
@@ -19,8 +20,9 @@ class MenuItemAdapter(
         val tvName: TextView = itemView.findViewById(R.id.tvMenuItemName)
         val tvPrice: TextView = itemView.findViewById(R.id.tvMenuItemPrice)
         val tvDesc: TextView = itemView.findViewById(R.id.tvMenuItemDesc)
+        val ivImage: android.widget.ImageView = itemView.findViewById(R.id.ivMenuItemImage)
         val btnEdit: Button = itemView.findViewById(R.id.btnEdit)
-        val btnDelete: Button = itemView.findViewById(R.id.btnDelete)
+        val btnDelete: android.widget.ImageButton = itemView.findViewById(R.id.btnDelete)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MenuItemViewHolder {
@@ -31,11 +33,20 @@ class MenuItemAdapter(
     override fun onBindViewHolder(holder: MenuItemViewHolder, position: Int) {
         val item = items[position]
         holder.tvName.text = item.name
-        holder.tvPrice.text = "$${item.price}"
+        holder.tvPrice.text = "${item.price} DH"
         holder.tvDesc.text = item.description ?: ""
+        
+        if (!item.imageUrl.isNullOrEmpty()) {
+            val fullUrl = if (item.imageUrl!!.startsWith("http")) item.imageUrl 
+                           else "http://10.0.2.2:8080${item.imageUrl}"
+            com.bumptech.glide.Glide.with(holder.itemView.context).load(fullUrl).into(holder.ivImage)
+        } else {
+            holder.ivImage.setImageResource(R.drawable.ic_launcher_background) // Placeholder
+        }
 
         holder.btnEdit.setOnClickListener { onEditClick(item) }
         holder.btnDelete.setOnClickListener { onDeleteClick(item) }
+        holder.itemView.setOnClickListener { onItemClick(item) }
     }
 
     override fun getItemCount() = items.size

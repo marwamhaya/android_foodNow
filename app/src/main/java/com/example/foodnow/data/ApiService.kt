@@ -53,6 +53,9 @@ interface ApiService {
     @DELETE("/api/menu-items/{id}")
     suspend fun deleteMenuItem(@Path("id") id: Long): Response<Void>
 
+    @GET("/api/menu-items/{id}")
+    suspend fun getMenuItemById(@Path("id") id: Long): Response<MenuItemResponse>
+
     // Order Actions
     @retrofit2.http.PATCH("/api/restaurants/orders/{id}/accept")
     suspend fun acceptOrder(@Path("id") id: Long): Response<Order>
@@ -95,8 +98,26 @@ interface ApiService {
     @POST("/api/livreurs")
     suspend fun createLivreur(@Body request: LivreurRequest): Response<LivreurResponse>
 
+    @GET("/api/livreurs")
+    suspend fun getAllLivreurs(): Response<List<LivreurResponse>>
+
     @GET("/api/admin/users")
     suspend fun getAllUsers(): Response<List<User>>
+
+    @retrofit2.http.PUT("/api/restaurants/{id}")
+    suspend fun updateRestaurant(@Path("id") id: Long, @Body request: RestaurantRequest): Response<RestaurantResponse>
+
+    @GET("/api/restaurants/{id}")
+    suspend fun getRestaurantById(@Path("id") id: Long): Response<RestaurantResponse>
+
+    @retrofit2.http.PUT("/api/livreurs/{id}")
+    suspend fun updateLivreur(@Path("id") id: Long, @Body request: LivreurRequest): Response<LivreurResponse>
+
+    @GET("/api/livreurs/{id}")
+    suspend fun getLivreurById(@Path("id") id: Long): Response<LivreurResponse>
+
+    @retrofit2.http.PATCH("/api/livreurs/{id}/status")
+    suspend fun toggleLivreurStatus(@Path("id") id: Long): Response<Void>
 
     @GET("/api/admin/restaurants")
     suspend fun getAllRestaurantsAdmin(): Response<List<RestaurantResponse>> // Or PageResponse if strictly following Controller (which returns List in AdminController but Page in RestaurantController/admin)
@@ -111,9 +132,42 @@ interface ApiService {
     @retrofit2.http.PATCH("/api/admin/restaurants/{id}/status")
     suspend fun toggleRestaurantStatus(@Path("id") id: Long): Response<Void>
 
+    @POST("/api/admin/users/{id}/reset-password")
+    suspend fun resetUserPassword(@Path("id") id: Long, @Body payload: Map<String, String>): Response<Void>
+
     @GET("/api/restaurants/{id}/orders")
     suspend fun getRestaurantOrders(@Path("id") id: Long): Response<PageResponse<Order>>
 
     @POST("/api/payments/simulate")
     suspend fun simulatePayment(@Body request: PaymentRequest): Response<PaymentResponse>
+
+    @GET("/api/admin/restaurants/{id}/orders/count/today")
+    suspend fun getDailyOrderCount(@Path("id") id: Long): Response<Long>
+
+    // Restaurant Orders with Status Filtering
+    @GET("/api/restaurants/my-restaurant/orders/status/{status}")
+    suspend fun getMyRestaurantOrdersByStatus(
+        @Path("status") status: String,
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 10
+    ): Response<PageResponse<Order>>
+
+    // File Upload
+    @retrofit2.http.Multipart
+    @POST("/api/upload/restaurant/{id}")
+    suspend fun uploadRestaurantImage(
+        @Path("id") id: Long,
+        @retrofit2.http.Part image: okhttp3.MultipartBody.Part
+    ): Response<Map<String, String>>
+
+    @retrofit2.http.Multipart
+    @POST("/api/upload/menu-item/{id}")
+    suspend fun uploadMenuItemImage(
+        @Path("id") id: Long,
+        @retrofit2.http.Part image: okhttp3.MultipartBody.Part
+    ): Response<Map<String, String>>
+
+    // Change Password for Restaurant Users
+    @retrofit2.http.PUT("/api/auth/change-password")
+    suspend fun changePasswordAuth(@Body request: ChangePasswordRequest): Response<Map<String, String>>
 }

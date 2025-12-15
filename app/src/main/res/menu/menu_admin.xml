@@ -2,14 +2,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/adminDashboardFragment"
-        android:icon="@drawable/ic_launcher_foreground"
+        android:icon="@drawable/ic_dashboard_24"
         android:title="Dashboard" />
     <item
         android:id="@+id/adminRestaurantsFragment"
-        android:icon="@drawable/ic_launcher_foreground"
+        android:icon="@drawable/ic_restaurant_24"
         android:title="Restaurants" />
     <item
         android:id="@+id/adminLivreursFragment"
-        android:icon="@drawable/ic_launcher_foreground"
+        android:icon="@drawable/ic_delivery_dining_24"
         android:title="Livreurs" />
+    <item
+        android:id="@+id/adminUsersFragment"
+        android:icon="@drawable/ic_people_24"
+        android:title="Users" />
 </menu>

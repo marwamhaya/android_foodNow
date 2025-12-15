@@ -9,13 +9,31 @@
         android:id="@+id/restaurantDashboardFragment"
         android:name="com.example.foodnow.ui.restaurant.RestaurantDashboardFragment"
         android:label="Dashboard"
-        tools:layout="@layout/fragment_restaurant_dashboard" />
+        tools:layout="@layout/fragment_restaurant_dashboard">
+        <action
+            android:id="@+id/action_dashboard_to_profile"
+            app:destination="@id/restaurantProfileFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/restaurantOrdersFragment"
         android:name="com.example.foodnow.ui.restaurant.RestaurantOrdersFragment"
         android:label="Orders"
-        tools:layout="@layout/fragment_restaurant_orders" />
+        tools:layout="@layout/fragment_restaurant_orders">
+        <action
+            android:id="@+id/action_orders_to_details"
+            app:destination="@id/orderDetailsFragment" />
+    </fragment>
+    
+    <fragment
+        android:id="@+id/orderDetailsFragment"
+        android:name="com.example.foodnow.ui.restaurant.OrderDetailsFragment"
+        android:label="Order Details"
+        tools:layout="@layout/fragment_order_details">
+        <argument
+            android:name="orderId"
+            app:argType="long" />
+    </fragment>
 
     <fragment
         android:id="@+id/restaurantMenuFragment"
@@ -25,11 +43,78 @@
         <action
             android:id="@+id/action_menu_to_addEdit"
             app:destination="@id/addEditMenuItemFragment" />
+        <action
+            android:id="@+id/action_menu_to_details"
+            app:destination="@id/menuItemDetailsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/menuItemDetailsFragment"
+        android:name="com.example.foodnow.ui.restaurant.MenuItemDetailsFragment"
+        android:label="Item Details"
+        tools:layout="@layout/fragment_menu_item_details">
+        <argument
+            android:name="menuItemId"
+            app:argType="long" />
+        <action
+            android:id="@+id/action_details_to_edit"
+            app:destination="@id/addEditMenuItemFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/addEditMenuItemFragment"
         android:name="com.example.foodnow.ui.restaurant.AddEditMenuItemFragment"
         android:label="Add/Edit Menu Item"
-        tools:layout="@layout/fragment_add_edit_menu_item" />
+        tools:layout="@layout/fragment_add_edit_menu_item">
+        <action
+            android:id="@+id/action_addEdit_to_supplements"
+            app:destination="@id/supplementEditorFragment" />
+        <argument
+            android:name="menuItemId"
+            app:argType="long"
+            android:defaultValue="-1L" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/supplementEditorFragment"
+        android:name="com.example.foodnow.ui.restaurant.SupplementEditorFragment"
+        android:label="Manage Supplements"
+        tools:layout="@layout/fragment_supplement_editor">
+        <argument
+            android:name="menuItemId"
+            app:argType="long" />
+        <action
+            android:id="@+id/action_supplements_to_group"
+            app:destination="@id/supplementGroupFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/supplementGroupFragment"
+        android:name="com.example.foodnow.ui.restaurant.SupplementGroupFragment"
+        android:label="Edit Supplement Group"
+        tools:layout="@layout/fragment_supplement_group">
+        <argument
+            android:name="groupId"
+            app:argType="long" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/restaurantProfileFragment"
+        android:name="com.example.foodnow.ui.restaurant.RestaurantProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_restaurant_profile">
+        <action
+            android:id="@+id/action_profile_to_changePassword"
+            app:destination="@id/changePasswordFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/changePasswordFragment"
+        android:name="com.example.foodnow.ui.restaurant.ChangePasswordFragment"
+        android:label="Change Password"
+        tools:layout="@layout/fragment_change_password" />
+        
+    <!-- Action from Dashboard to Profile -->
+    <!-- Ideally dashboard has a menu or button to go to profile -->
+    <!-- Adding action to dashboard fragment -->
 </navigation>

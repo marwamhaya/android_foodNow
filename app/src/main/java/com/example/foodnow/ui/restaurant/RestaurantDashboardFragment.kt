@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import com.example.foodnow.FoodNowApp
 import com.example.foodnow.R
 import com.example.foodnow.ui.ViewModelFactory
+import androidx.navigation.fragment.findNavController
 
 class RestaurantDashboardFragment : Fragment(R.layout.fragment_restaurant_dashboard) {
 
@@ -25,9 +26,17 @@ class RestaurantDashboardFragment : Fragment(R.layout.fragment_restaurant_dashbo
         val tvStatus = view.findViewById<TextView>(R.id.tvRestaurantStatus)
         val tvDesc = view.findViewById<TextView>(R.id.tvRestaurantDescription)
         val btnRefresh = view.findViewById<Button>(R.id.btnRefresh)
+        val ivImage = view.findViewById<android.widget.ImageView>(R.id.ivRestaurantImage)
+        
+
+        val btnEditProfile = view.findViewById<Button>(R.id.btnEditProfile)
         
         btnRefresh.setOnClickListener {
             viewModel.getMyRestaurant()
+        }
+
+        btnEditProfile.setOnClickListener {
+            findNavController().navigate(R.id.action_dashboard_to_profile)
         }
 
         viewModel.restaurant.observe(viewLifecycleOwner) { result ->
@@ -36,6 +45,16 @@ class RestaurantDashboardFragment : Fragment(R.layout.fragment_restaurant_dashbo
                 tvAddress.text = restaurant.address ?: "No address"
                 tvStatus.text = if (restaurant.isActive) "Status: OPEN" else "Status: CLOSED"
                 tvDesc.text = restaurant.description ?: "No description"
+                
+                // Load restaurant image
+                if (!restaurant.imageUrl.isNullOrEmpty()) {
+                    val fullUrl = if (restaurant.imageUrl.startsWith("http")) restaurant.imageUrl
+                                   else "http://10.0.2.2:8080${restaurant.imageUrl}"
+                    com.bumptech.glide.Glide.with(this)
+                        .load(fullUrl)
+                        .placeholder(android.R.drawable.ic_menu_gallery)
+                        .into(ivImage)
+                }
             }.onFailure {
                 tvName.text = "Error loading restaurant"
                 Toast.makeText(context, "Error: ${it.message}", Toast.LENGTH_LONG).show()

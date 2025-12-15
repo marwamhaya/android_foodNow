@@ -2,14 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/restaurantDashboardFragment"
-        android:icon="@drawable/ic_launcher_foreground"
+        android:icon="@drawable/ic_dashboard_24"
         android:title="Dashboard" />
     <item
         android:id="@+id/restaurantOrdersFragment"
-        android:icon="@drawable/ic_launcher_foreground"
+        android:icon="@drawable/ic_receipt_long_24"
         android:title="Orders" />
     <item
         android:id="@+id/restaurantMenuFragment"
-        android:icon="@drawable/ic_launcher_foreground"
+        android:icon="@drawable/ic_restaurant_24"
         android:title="Menu" />
 </menu>

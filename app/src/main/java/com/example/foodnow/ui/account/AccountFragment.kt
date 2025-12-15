@@ -76,14 +76,33 @@ class AccountFragment : Fragment(R.layout.fragment_account) {
     }
 
     private fun showChangePasswordDialog() {
-        val input = EditText(context)
+        val layout = android.widget.LinearLayout(context).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding(50, 40, 50, 10)
+        }
+
+        val etCurrent = EditText(context).apply {
+            hint = "Current Password"
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+        }
+        val etNew = EditText(context).apply {
+            hint = "New Password"
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+        }
+
+        layout.addView(etCurrent)
+        layout.addView(etNew)
+
         AlertDialog.Builder(context)
             .setTitle("Change Password")
-            .setView(input)
+            .setView(layout)
             .setPositiveButton("Update") { _, _ ->
-                val newPass = input.text.toString()
-                if (newPass.isNotEmpty()) {
-                    viewModel.changePassword(newPass)
+                val current = etCurrent.text.toString()
+                val newPass = etNew.text.toString()
+                if (current.isNotEmpty() && newPass.isNotEmpty()) {
+                    viewModel.changePassword(current, newPass)
+                } else {
+                    Toast.makeText(context, "Both fields required", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Cancel", null)

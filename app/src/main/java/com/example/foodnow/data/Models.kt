@@ -24,6 +24,13 @@ data class AuthResponse(
     val role: String
 )
 
+data class ChangePasswordRequest(
+    val currentPassword: String,
+    val newPassword: String
+)
+
+
+
 // Restaurant
 data class RestaurantResponse(
     val id: Long,
@@ -32,7 +39,10 @@ data class RestaurantResponse(
     val address: String?,
     val phone: String?,
     val imageUrl: String?,
-    val isActive: Boolean
+    val isActive: Boolean,
+    val ownerId: Long?,
+    val ownerName: String?,
+    val openingHours: String?
 )
 
 // Menu
@@ -67,10 +77,9 @@ data class MenuItemRequest(
     val price: BigDecimal,
     val imageUrl: String?,
     val category: String?,
-    val isAvailable: Boolean
+    val isAvailable: Boolean,
+    val optionGroups: List<MenuOptionGroupResponse> = emptyList()
 )
-
-
 
 data class RestaurantRequest(
     val name: String,
@@ -78,6 +87,7 @@ data class RestaurantRequest(
     val description: String?,
     val phone: String,
     val imageUrl: String?,
+    val openingHours: String?,
     // Admin fields
     val ownerEmail: String,
     val ownerPassword: String,
@@ -110,6 +120,7 @@ data class PageResponse<T>(
     val totalPages: Int,
     val last: Boolean
 )
+
 data class Order(
     val id: Long,
     val restaurantName: String, // Assuming backend projection or fetch
@@ -138,6 +149,7 @@ data class LivreurResponse(
     val id: Long,
     val userId: Long,
     val fullName: String,
+    val email: String?,
     val phone: String?,
     val vehicleType: String?,
     val isAvailable: Boolean,

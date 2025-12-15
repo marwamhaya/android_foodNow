@@ -30,7 +30,7 @@ class AdminRestaurantsFragment : Fragment(R.layout.fragment_admin_restaurants) {
             onToggleClick = { item -> viewModel.toggleRestaurantStatus(item.id) },
             onItemClick = { item -> 
                 val bundle = Bundle().apply { putLong("restaurantId", item.id) }
-                findNavController().navigate(R.id.action_admin_restaurants_to_orders, bundle)
+                findNavController().navigate(R.id.action_admin_restaurants_to_details, bundle)
             }
         )
         rv.adapter = adapter
@@ -41,6 +41,9 @@ class AdminRestaurantsFragment : Fragment(R.layout.fragment_admin_restaurants) {
 
         viewModel.restaurants.observe(viewLifecycleOwner) { result ->
             result.onSuccess { list -> adapter.updateData(list) }
+            result.onFailure { e -> 
+                android.widget.Toast.makeText(context, "Error: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
+            }
         }
 
         viewModel.getAllRestaurants()

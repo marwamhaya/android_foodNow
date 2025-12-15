@@ -6,10 +6,40 @@
     app:startDestination="@id/adminDashboardFragment">
 
     <fragment
-        android:id="@+id/adminDashboardFragment"
-        android:name="com.example.foodnow.ui.admin.AdminDashboardFragment"
-        android:label="Dashboard"
-        tools:layout="@layout/fragment_admin_dashboard" />
+        android:id="@+id/adminRestaurantDetailsFragment"
+        android:name="com.example.foodnow.ui.admin.AdminRestaurantDetailsFragment"
+        android:label="Restaurant Details"
+        tools:layout="@layout/fragment_admin_restaurant_details">
+        <argument
+            android:name="restaurantId"
+            app:argType="long" />
+        <action
+            android:id="@+id/action_details_to_edit"
+            app:destination="@id/adminEditRestaurantFragment" />
+        <action
+             android:id="@+id/action_details_to_orders"
+             app:destination="@id/adminOrdersFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminEditRestaurantFragment"
+        android:name="com.example.foodnow.ui.admin.AdminEditRestaurantFragment"
+        android:label="Edit Restaurant"
+        tools:layout="@layout/fragment_admin_edit_restaurant">
+        <argument
+            android:name="restaurantId"
+            app:argType="long" />
+    </fragment>
+    
+    <fragment
+        android:id="@+id/adminEditLivreurFragment"
+        android:name="com.example.foodnow.ui.admin.AdminEditLivreurFragment"
+        android:label="Edit Livreur"
+        tools:layout="@layout/fragment_admin_edit_livreur">
+        <argument
+            android:name="livreurId"
+            app:argType="long" />
+    </fragment>
 
     <fragment
         android:id="@+id/adminRestaurantsFragment"
@@ -20,9 +50,40 @@
             android:id="@+id/action_admin_restaurants_to_create"
             app:destination="@id/createRestaurantFragment" />
         <action
-            android:id="@+id/action_admin_restaurants_to_orders"
-            app:destination="@id/adminOrdersFragment" />
+            android:id="@+id/action_admin_restaurants_to_details"
+            app:destination="@id/adminRestaurantDetailsFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/adminLivreursFragment"
+        android:name="com.example.foodnow.ui.admin.AdminLivreursFragment"
+        android:label="Livreurs"
+        tools:layout="@layout/fragment_admin_livreurs">
+        <action
+            android:id="@+id/action_admin_livreurs_to_create"
+            app:destination="@id/createLivreurFragment" />
+        <action
+            android:id="@+id/action_admin_livreurs_to_edit"
+            app:destination="@id/adminEditLivreurFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/createLivreurFragment"
+        android:name="com.example.foodnow.ui.admin.CreateLivreurFragment"
+        android:label="New Livreur"
+        tools:layout="@layout/fragment_create_livreur" />
+        
+    <fragment
+        android:id="@+id/adminUsersFragment"
+        android:name="com.example.foodnow.ui.admin.AdminUsersFragment"
+        android:label="Users"
+        tools:layout="@layout/fragment_admin_users" />
+
+     <fragment
+        android:id="@+id/adminDashboardFragment"
+        android:name="com.example.foodnow.ui.admin.AdminDashboardFragment"
+        android:label="Dashboard"
+        tools:layout="@layout/fragment_admin_dashboard" />
 
     <fragment
         android:id="@+id/adminOrdersFragment"
@@ -35,20 +96,4 @@
         android:name="com.example.foodnow.ui.admin.CreateRestaurantFragment"
         android:label="New Restaurant"
         tools:layout="@layout/fragment_create_restaurant" />
-
-    <fragment
-        android:id="@+id/adminLivreursFragment"
-        android:name="com.example.foodnow.ui.admin.AdminLivreursFragment"
-        android:label="Livreurs"
-        tools:layout="@layout/fragment_admin_livreurs">
-        <action
-            android:id="@+id/action_admin_livreurs_to_create"
-            app:destination="@id/createLivreurFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/createLivreurFragment"
-        android:name="com.example.foodnow.ui.admin.CreateLivreurFragment"
-        android:label="New Livreur"
-        tools:layout="@layout/fragment_create_livreur" />
 </navigation>

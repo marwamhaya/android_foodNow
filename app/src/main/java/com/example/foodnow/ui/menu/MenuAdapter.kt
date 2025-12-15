@@ -36,8 +36,10 @@ class MenuAdapter(
         holder.tvPrice.text = "${String.format("%.2f", item.price)} DH"
 
         if (!item.imageUrl.isNullOrEmpty()) {
+            val fullUrl = if (item.imageUrl.startsWith("http")) item.imageUrl 
+                           else "http://10.0.2.2:8080${item.imageUrl}"
             Glide.with(holder.itemView.context)
-                .load(item.imageUrl)
+                .load(fullUrl)
                 .placeholder(android.R.drawable.ic_menu_gallery)
                 .into(holder.ivDish)
         } else {

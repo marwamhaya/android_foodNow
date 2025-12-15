@@ -26,24 +26,28 @@ class AdminLivreursFragment : Fragment(R.layout.fragment_admin_livreurs) {
         val fab = view.findViewById<FloatingActionButton>(R.id.fabAddLivreur)
 
         rv.layoutManager = LinearLayoutManager(context)
-        adapter = AdminLivreurAdapter(emptyList()) { item ->
-            viewModel.toggleUserStatus(item.id)
-        }
+        adapter = AdminLivreurAdapter(emptyList(), 
+            onToggleClick = { item -> viewModel.toggleLivreurStatus(item.id) }, 
+            onItemClick = { item ->
+                val bundle = Bundle().apply { putLong("livreurId", item.id) }
+                findNavController().navigate(R.id.action_admin_livreurs_to_edit, bundle)
+            }
+        )
         rv.adapter = adapter
 
         fab.setOnClickListener {
             findNavController().navigate(R.id.action_admin_livreurs_to_create)
         }
 
-        viewModel.users.observe(viewLifecycleOwner) { result ->
+        viewModel.livreurs.observe(viewLifecycleOwner) { result ->
             result.onSuccess { list -> 
-                // Filter only Livreurs? Or users with ROLE_LIVREUR?
-                // API getAllUsers returns all users. I should filter.
-                val livreurs = list.filter { it.role == "ROLE_LIVREUR" } // Assuming Role string
-                adapter.updateData(livreurs) 
+                adapter.updateData(list) 
+            }
+            result.onFailure { e ->
+                android.widget.Toast.makeText(requireContext(), "Error: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
             }
         }
 
-        viewModel.getAllUsers()
+        viewModel.getAllLivreurs()
     }
 }

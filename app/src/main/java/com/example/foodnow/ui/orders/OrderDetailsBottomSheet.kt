@@ -12,6 +12,8 @@ import com.example.foodnow.data.Order
 import com.example.foodnow.data.OrderItem
 import com.example.foodnow.databinding.BottomSheetOrderDetailsBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import androidx.navigation.fragment.findNavController
+import com.example.foodnow.ui.orders.TrackOrderFragment
 import java.math.BigDecimal
 
 class OrderDetailsBottomSheet(private val order: Order) : BottomSheetDialogFragment() {
@@ -44,6 +46,28 @@ class OrderDetailsBottomSheet(private val order: Order) : BottomSheetDialogFragm
         val adapter = OrderItemsAdapter(order.items)
         binding.rvOrderItems.layoutManager = LinearLayoutManager(context)
         binding.rvOrderItems.adapter = adapter
+
+        // Handle Track Button visibility
+        if (order.status == "IN_DELIVERY" || order.status == "ON_THE_WAY" || order.status == "PICKED_UP") {
+            binding.btnTrackOrder.visibility = View.VISIBLE
+            binding.btnTrackOrder.setOnClickListener {
+                dismiss()
+                val bundle = Bundle().apply { putLong("orderId", order.id) }
+                try {
+                    findNavController().navigate(R.id.nav_track_order, bundle)
+                } catch (e: Exception) {
+                    // Fallback
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.nav_host_fragment, TrackOrderFragment().apply { arguments = bundle })
+                        .addToBackStack(null)
+                        .commit()
+                }
+            }
+        } else {
+             binding.btnTrackOrder.visibility = View.GONE
+        }
+        
+        binding.btnClose.setOnClickListener { dismiss() }
     }
 }
 

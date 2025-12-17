@@ -12,7 +12,9 @@
         <item name="colorOnSecondary">@color/black</item>
         <!-- Backgrounds -->
         <item name="android:windowBackground">@color/background</item>
+        <item name="android:windowBackground">@color/background</item>
         <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">@color/background</item>
         <item name="android:windowLightStatusBar">true</item>

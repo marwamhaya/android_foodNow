@@ -45,7 +45,7 @@ class MenuViewModel(private val repository: Repository) : ViewModel() {
         _cart.value = currentCart
     }
 
-    fun placeOrder(restaurantId: Long) {
+    fun placeOrder(restaurantId: Long, latitude: Double, longitude: Double) {
         val items = CartManager.getOrderRequests()
         if (items.isEmpty()) return
 
@@ -54,7 +54,18 @@ class MenuViewModel(private val repository: Repository) : ViewModel() {
                 val request = OrderRequest(restaurantId, items, "Default Delivery Address")
                 val response = repository.createOrder(request)
                 if (response.isSuccessful && response.body() != null) {
-                    _orderResult.value = Result.success(response.body()!!)
+                    val order = response.body()!!
+                    
+                    // Save client GPS location for this order
+                    try {
+                        val locationDto = com.example.foodnow.data.LocationUpdateDto(latitude, longitude)
+                        repository.saveOrderLocation(order.id, locationDto)
+                    } catch (e: Exception) {
+                        // Log but don't fail the order if location save fails
+                        android.util.Log.e("MenuViewModel", "Failed to save order location", e)
+                    }
+                    
+                    _orderResult.value = Result.success(order)
                     CartManager.clearCart() // Clear global cart
                 } else {
                     _orderResult.value = Result.failure(Exception("Failed to place order: ${response.code()}"))

@@ -80,9 +80,11 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    // Maps & Location
-    implementation("com.google.android.gms:play-services-maps:18.2.0")
-    implementation("com.google.android.gms:play-services-location:21.0.1")
+    // Maps - OSMDroid (OpenStreetMap)
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
+    
+    // OSMBonusPack for routing
+    implementation("com.github.MKergall:osmbonuspack:6.9.0")
 
     // WebSocket (Stomp)
     implementation("com.github.NaikSoftware:StompProtocolAndroid:1.6.6")

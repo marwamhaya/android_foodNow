@@ -22,4 +22,13 @@
         android:name="com.example.foodnow.ui.livreur.LivreurProfileFragment"
         android:label="Profile"
         tools:layout="@layout/fragment_livreur_profile" />
+    <fragment
+        android:id="@+id/nav_active_delivery"
+        android:name="com.example.foodnow.ui.livreur.ActiveDeliveryFragment"
+        android:label="Active Delivery"
+        tools:layout="@layout/fragment_active_delivery">
+        <argument
+            android:name="delivery_id"
+            app:argType="long" />
+    </fragment>
 </navigation>

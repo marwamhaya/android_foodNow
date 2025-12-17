@@ -76,14 +76,18 @@
         tools:layout="@layout/fragment_orders">
         <action
             android:id="@+id/action_orders_to_track"
-            app:destination="@id/trackOrderFragment" />
+            app:destination="@id/nav_track_order" />
     </fragment>
 
     <fragment
-        android:id="@+id/trackOrderFragment"
+        android:id="@+id/nav_track_order"
         android:name="com.example.foodnow.ui.orders.TrackOrderFragment"
         android:label="Track Order"
-        tools:layout="@layout/fragment_track_order" />
+        tools:layout="@layout/fragment_track_order">
+        <argument
+            android:name="orderId"
+            app:argType="long" />
+    </fragment>
 
     <fragment
         android:id="@+id/accountFragment"

@@ -38,7 +38,7 @@ class MenuItemAdapter(
         
         if (!item.imageUrl.isNullOrEmpty()) {
             val fullUrl = if (item.imageUrl!!.startsWith("http")) item.imageUrl 
-                           else "http://10.0.2.2:8080${item.imageUrl}"
+                           else "http://100.79.107.106:8080${item.imageUrl}"
             com.bumptech.glide.Glide.with(holder.itemView.context).load(fullUrl).into(holder.ivImage)
         } else {
             holder.ivImage.setImageResource(R.drawable.ic_launcher_background) // Placeholder

@@ -34,28 +34,29 @@ class RestaurantOrderAdapter(
         holder.tvStatus.text = "Status: ${order.status}"
         holder.tvPrice.text = "Total: $${order.totalAmount}"
 
+        // Reset state for recycling
+        holder.btnAction1.isEnabled = true
+        holder.btnAction1.visibility = View.VISIBLE
+        holder.btnAction2.isEnabled = true 
+        holder.btnAction2.visibility = View.VISIBLE
+
         // Configure buttons based on status
         when (order.status) {
             "PENDING" -> {
                 holder.btnAction1.text = "Accept"
-                holder.btnAction1.visibility = View.VISIBLE
                 holder.btnAction2.text = "Reject"
-                holder.btnAction2.visibility = View.VISIBLE
             }
             "ACCEPTED" -> {
                 holder.btnAction1.text = "Prepare"
-                holder.btnAction1.visibility = View.VISIBLE
                 holder.btnAction2.visibility = View.GONE
             }
             "PREPARING" -> {
                 holder.btnAction1.text = "Ready"
-                holder.btnAction1.visibility = View.VISIBLE
                 holder.btnAction2.visibility = View.GONE
             }
              "READY_FOR_PICKUP" -> {
                 holder.btnAction1.text = "Waiting for Pickup"
                 holder.btnAction1.isEnabled = false // Wait for livreur
-                holder.btnAction1.visibility = View.VISIBLE
                 holder.btnAction2.visibility = View.GONE
             }
             else -> {
@@ -64,8 +65,14 @@ class RestaurantOrderAdapter(
             }
         }
 
-        holder.btnAction1.setOnClickListener { onAction1Click(order) }
-        holder.btnAction2.setOnClickListener { onAction2Click(order) }
+        holder.btnAction1.setOnClickListener { 
+            android.widget.Toast.makeText(holder.itemView.context, "Clicked Action 1", android.widget.Toast.LENGTH_SHORT).show()
+            onAction1Click(order) 
+        }
+        holder.btnAction2.setOnClickListener { 
+            android.widget.Toast.makeText(holder.itemView.context, "Clicked Action 2", android.widget.Toast.LENGTH_SHORT).show()
+            onAction2Click(order) 
+        }
     }
 
     override fun getItemCount() = orders.size

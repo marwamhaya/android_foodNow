@@ -49,7 +49,7 @@ class RestaurantDashboardFragment : Fragment(R.layout.fragment_restaurant_dashbo
                 // Load restaurant image
                 if (!restaurant.imageUrl.isNullOrEmpty()) {
                     val fullUrl = if (restaurant.imageUrl.startsWith("http")) restaurant.imageUrl
-                                   else "http://10.0.2.2:8080${restaurant.imageUrl}"
+                                   else "http://100.79.107.106:8080${restaurant.imageUrl}"
                     com.bumptech.glide.Glide.with(this)
                         .load(fullUrl)
                         .placeholder(android.R.drawable.ic_menu_gallery)

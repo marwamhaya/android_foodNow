@@ -79,4 +79,56 @@ class LivreurViewModel(private val repository: Repository) : ViewModel() {
             }
         }
     }
+    private val _availableRequests = MutableLiveData<Result<List<DeliveryResponse>>>()
+    val availableRequests: LiveData<Result<List<DeliveryResponse>>> = _availableRequests
+    
+    private val _requestActionStatus = MutableLiveData<Result<String>>()
+    val requestActionStatus: LiveData<Result<String>> = _requestActionStatus
+
+    fun getAvailableRequests() {
+        viewModelScope.launch {
+            try {
+                val response = repository.getAvailableDeliveryRequests()
+                if (response.isSuccessful && response.body() != null) {
+                    _availableRequests.value = Result.success(response.body()!!)
+                } else {
+                     _availableRequests.value = Result.failure(Exception("Failed to fetch requests"))
+                }
+            } catch (e: Exception) {
+                _availableRequests.value = Result.failure(e)
+            }
+        }
+    }
+
+    fun acceptDeliveryRequest(requestId: Long) {
+        viewModelScope.launch {
+            try {
+                val response = repository.acceptDeliveryRequest(requestId)
+                if (response.isSuccessful) {
+                    _requestActionStatus.value = Result.success("Delivery Accepted")
+                    getAvailableRequests() // Refresh list
+                    getAssignedDeliveries() // Refresh assigned
+                } else {
+                    _requestActionStatus.value = Result.failure(Exception("Failed to accept delivery"))
+                }
+            } catch (e: Exception) {
+                _requestActionStatus.value = Result.failure(e)
+            }
+        }
+    }
+    
+    fun declineDeliveryRequest(requestId: Long) {
+        viewModelScope.launch {
+            try {
+                val response = repository.declineDeliveryRequest(requestId)
+                if (response.isSuccessful) {
+                     _requestActionStatus.value = Result.success("Delivery Declined")
+                     getAvailableRequests() // Refresh list (it might disappear if we filtered it locally, but backend no-op means it stays unless we handle it locally)
+                     // Ideally we remove it from the local list
+                }
+            } catch (e: Exception) {
+                 _requestActionStatus.value = Result.failure(e)
+            }
+        }
+    }
 }

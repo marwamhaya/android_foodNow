@@ -1,11 +1,15 @@
 package com.example.foodnow.ui.menu
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioButton
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import com.example.foodnow.R
 import com.example.foodnow.databinding.BottomSheetPaymentBinding
 import com.example.foodnow.utils.CartManager
@@ -41,8 +45,8 @@ class PaymentBottomSheet(private val viewModel: MenuViewModel, private val resta
         viewModel.paymentResult.observe(viewLifecycleOwner) { result ->
             result.onSuccess {
                 Toast.makeText(context, "Payment Successful: ${it.message}", Toast.LENGTH_SHORT).show()
-                // Proceed to place order
-                viewModel.placeOrder(restaurantId)
+                // Get GPS location and place order
+                placeOrderWithLocation()
             }.onFailure {
                 binding.btnConfirmPayment.isEnabled = true
                 binding.btnConfirmPayment.text = "Pay & Order"
@@ -63,6 +67,36 @@ class PaymentBottomSheet(private val viewModel: MenuViewModel, private val resta
                Toast.makeText(context, "Order Creation Failed: ${it.message}", Toast.LENGTH_SHORT).show()
                dismiss()
             }
+        }
+    }
+    
+    private fun placeOrderWithLocation() {
+        try {
+            // Check location permission
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) 
+                != PackageManager.PERMISSION_GRANTED) {
+                // No permission - use default coordinates (0,0) or show error
+                Toast.makeText(context, "Location permission not granted. Using default location.", Toast.LENGTH_SHORT).show()
+                viewModel.placeOrder(restaurantId, 0.0, 0.0)
+                return
+            }
+            
+            // Get location
+            val locationManager = requireContext().getSystemService(android.content.Context.LOCATION_SERVICE) as LocationManager
+            val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                ?: locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+            
+            if (location != null) {
+                viewModel.placeOrder(restaurantId, location.latitude, location.longitude)
+            } else {
+                // No location available - use default
+                Toast.makeText(context, "Unable to get current location. Using default.", Toast.LENGTH_SHORT).show()
+                viewModel.placeOrder(restaurantId, 0.0, 0.0)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("PaymentBottomSheet", "Error getting location", e)
+            // Fallback to default location
+            viewModel.placeOrder(restaurantId, 0.0, 0.0)
         }
     }
 }

@@ -29,4 +29,13 @@
         android:text="Go Offline"
         android:layout_marginTop="32dp" />
 
+    <Button
+        android:id="@+id/btnLogout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Logout"
+        android:backgroundTint="#FF0000"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="16dp" />
+
 </LinearLayout>

@@ -91,9 +91,9 @@ class RestaurantProfileFragment : Fragment(R.layout.fragment_restaurant_profile)
                 if (!restaurant.imageUrl.isNullOrEmpty()) {
                     // Construct full URL if needed or handle absolute path from backend
                     // Backend returns "/uploads/..."
-                    // Base URL is http://10.0.2.2:8080
+                    // Base URL is http://100.79.107.106:8080
                     val fullUrl = if (restaurant.imageUrl.startsWith("http")) restaurant.imageUrl 
-                                  else "http://10.0.2.2:8080${restaurant.imageUrl}"
+                                  else "http://100.79.107.106:8080${restaurant.imageUrl}"
                     
                     Glide.with(this)
                         .load(fullUrl)

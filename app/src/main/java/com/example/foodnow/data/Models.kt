@@ -163,6 +163,14 @@ data class LocationUpdateDto(
     val longitude: Double
 )
 
+data class OrderLocationResponse(
+    val orderId: Long,
+    val clientLatitude: Double,
+    val clientLongitude: Double,
+    val driverLatitude: Double?,
+    val driverLongitude: Double?
+)
+
 data class OrderItem(
     val id: Long,
     val menuItemName: String,

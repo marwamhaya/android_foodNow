@@ -32,31 +32,30 @@ class RestaurantOrdersFragment : Fragment(R.layout.fragment_restaurant_orders) {
         
         adapter = RestaurantOrderAdapter(emptyList(), 
             onAction1Click = { order ->
-                val bundle = Bundle().apply { putLong("orderId", order.id) }
-                findNavController().navigate(R.id.action_orders_to_details, bundle)
+                android.util.Log.d("RestaurantOrders", "Action 1 clicked for order ${order.id} with status ${order.status}")
+                val context = requireContext() // Ensure context is safe
+                // Toast.makeText(context, "Clicked Accept/Action1: ${order.status}", Toast.LENGTH_SHORT).show() 
+                when (order.status) {
+                    "PENDING" -> {
+                        android.util.Log.d("RestaurantOrders", "Calling acceptOrder")
+                        viewModel.acceptOrder(order.id)
+                    }
+                    "ACCEPTED" -> {
+                        android.util.Log.d("RestaurantOrders", "Calling prepareOrder")
+                        viewModel.prepareOrder(order.id)
+                    }
+                    "PREPARING" -> {
+                        android.util.Log.d("RestaurantOrders", "Calling readyOrder")
+                        viewModel.readyOrder(order.id)
+                    }
+                    else -> {
+                        android.util.Log.d("RestaurantOrders", "Unknown status for action 1: ${order.status}")
+                    }
+                }
             },
             onAction2Click = { order ->
-                // Quick reject? Or details?
-                // Let's make the whole item clickable or Action1 go to Details?
-                // Plan said "Order Details UI". Adapter has "Accept" button.
-                // Adapter usually has buttons.
-                // Let's map Action1 (primary button) to "View Details" temporarily or just keep logic.
-                // Re-reading logic: List has "Accept/Prepare" buttons.
-                // User might want to click the ROW to view details.
-                // Adapter `onAction1` handles status change. 
-                // I should add `onItemClick` to adapter? Or make one of the buttons go to details?
-                // `RestaurantOrderAdapter` (Step 220) is existing.
-                // I will add a click listener to the `itemView` in adapter if I can.
-                // Assuming I can't easily change Adapter interface right now without reading it.
-                // I'll assume Action1 is "Accept" and Action2 is "Reject".
-                // I need a way to go to details.
-                // Maybe I should modify Adapter to have `onItemClick`.
-                // For now, I'll make the whole ROW click go to details if adapter supports it?
-                // It likely doesn't.
-                // I'll make Action1 go to details instead of direct action?
-                // No, direct action is faster.
-                // I'll modify Adapter in next step if needed. 
-                // For now, I'll implement empty state logic.
+                android.util.Log.d("RestaurantOrders", "Action 2 clicked for order ${order.id}")
+                viewModel.rejectOrder(order.id, "Declined by restaurant")
             }
         )
         // Oops, I can't modify adapter callback behavior without changing adapter.
@@ -80,6 +79,14 @@ class RestaurantOrdersFragment : Fragment(R.layout.fragment_restaurant_orders) {
                 filterOrders(tabLayout.selectedTabPosition)
             }.onFailure {
                 Toast.makeText(context, "Error loading orders", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        viewModel.orderActionStatus.observe(viewLifecycleOwner) { result ->
+            result.onSuccess { msg ->
+                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+            }.onFailure { e ->
+                Toast.makeText(context, "Action failed: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
 

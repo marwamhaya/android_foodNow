@@ -251,7 +251,8 @@ class RestaurantViewModel(private val repository: Repository) : ViewModel() {
         if (currentRestaurantId == null) return
         viewModelScope.launch {
             try {
-                val response = repository.getMenuItems(currentRestaurantId!!)
+                // Fetch all items (active and inactive) for the owner
+                val response = repository.getMenuItems(currentRestaurantId!!, false)
                 if (response.isSuccessful && response.body() != null) {
                     _menuItems.value = Result.success(response.body()!!)
                 }
@@ -330,24 +331,57 @@ class RestaurantViewModel(private val repository: Repository) : ViewModel() {
         }
     }
 
+    private val _orderActionStatus = MutableLiveData<Result<String>>()
+    val orderActionStatus: LiveData<Result<String>> = _orderActionStatus
+
     fun acceptOrder(orderId: Long) {
+        android.util.Log.d("RestaurantVM", "acceptOrder called for $orderId")
         viewModelScope.launch {
-            repository.acceptOrder(orderId)
-            getOrders() // Refresh
+            try {
+                val response = repository.acceptOrder(orderId)
+                android.util.Log.d("RestaurantVM", "acceptOrder response: ${response.code()}")
+                if (response.isSuccessful) {
+                    _orderActionStatus.value = Result.success("Order Accepted")
+                    getOrders() // Refresh
+                } else {
+                    _orderActionStatus.value = Result.failure(Exception("Failed to accept order: ${response.code()}"))
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("RestaurantVM", "acceptOrder exception", e)
+                _orderActionStatus.value = Result.failure(e)
+            }
         }
     }
 
     fun prepareOrder(orderId: Long) {
         viewModelScope.launch {
-            repository.prepareOrder(orderId)
-            getOrders()
+            try {
+                val response = repository.prepareOrder(orderId)
+                if (response.isSuccessful) {
+                    _orderActionStatus.value = Result.success("Order Preparing")
+                    getOrders()
+                } else {
+                    _orderActionStatus.value = Result.failure(Exception("Failed to prepare order: ${response.code()}"))
+                }
+            } catch (e: Exception) {
+                _orderActionStatus.value = Result.failure(e)
+            }
         }
     }
 
     fun readyOrder(orderId: Long) {
         viewModelScope.launch {
-            repository.readyOrder(orderId)
-            getOrders()
+            try {
+               val response = repository.readyOrder(orderId)
+               if (response.isSuccessful) {
+                   _orderActionStatus.value = Result.success("Order Ready")
+                   getOrders()
+               } else {
+                   _orderActionStatus.value = Result.failure(Exception("Failed to mark ready: ${response.code()}"))
+               }
+            } catch (e: Exception) {
+                _orderActionStatus.value = Result.failure(e)
+            }
         }
     }
 
@@ -391,8 +425,17 @@ class RestaurantViewModel(private val repository: Repository) : ViewModel() {
 
     fun rejectOrder(orderId: Long, reason: String) {
         viewModelScope.launch {
-            repository.rejectOrder(orderId, reason)
-            getOrders()
+            try {
+                val response = repository.rejectOrder(orderId, reason)
+                if (response.isSuccessful) {
+                    _orderActionStatus.value = Result.success("Order Declined")
+                    getOrders()
+                } else {
+                    _orderActionStatus.value = Result.failure(Exception("Failed to decline order: ${response.code()}"))
+                }
+            } catch (e: Exception) {
+                _orderActionStatus.value = Result.failure(e)
+            }
         }
     }
 

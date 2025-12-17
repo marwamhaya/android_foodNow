@@ -103,7 +103,7 @@ class AddEditMenuItemFragment : Fragment(R.layout.fragment_add_edit_menu_item) {
              
              // Image logic
              if (!draft.imageUrl.isNullOrEmpty()) {
-                  val fullUrl = if (draft.imageUrl.startsWith("http")) draft.imageUrl else "http://10.0.2.2:8080${draft.imageUrl}"
+                  val fullUrl = if (draft.imageUrl.startsWith("http")) draft.imageUrl else "http://100.79.107.106:8080${draft.imageUrl}"
                   Glide.with(this).load(fullUrl).into(ivImage)
              }
              

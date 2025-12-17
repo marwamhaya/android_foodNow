@@ -35,12 +35,27 @@ class DeliveryAdapter(
         holder.tvClient.text = "To: ${item.clientName}\n${item.clientAddress}"
 
         when (item.status) {
+            "PENDING" -> {
+                holder.btnAction.text = "Accept"
+                holder.btnAction.visibility = View.VISIBLE
+            }
+            "DELIVERY_ACCEPTED" -> {
+                holder.btnAction.text = "Pick Up"
+                holder.btnAction.visibility = View.VISIBLE
+                
+                // Also could open map here to navigate to restaurant
+                holder.itemView.setOnClickListener { onActionClick(item) } 
+            }
+            "PICKED_UP" -> { 
+                holder.btnAction.text = "Open Active Map"
+                holder.btnAction.visibility = View.VISIBLE
+            }
             "READY_FOR_PICKUP" -> {
                 holder.btnAction.text = "Pick Up"
                 holder.btnAction.visibility = View.VISIBLE
             }
-            "IN_DELIVERY" -> {
-                holder.btnAction.text = "Mark Delivered"
+            "IN_DELIVERY", "ON_THE_WAY" -> {
+                holder.btnAction.text = "Open Active Map"
                 holder.btnAction.visibility = View.VISIBLE
             }
             "DELIVERED" -> {

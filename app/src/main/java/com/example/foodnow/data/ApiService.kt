@@ -20,7 +20,10 @@ interface ApiService {
     suspend fun getAllRestaurants(): Response<PageResponse<RestaurantResponse>>
 
     @GET("/api/restaurants/{id}/menu")
-    suspend fun getMenuItems(@Path("id") restaurantId: Long): Response<List<MenuItemResponse>>
+    suspend fun getMenuItems(
+        @Path("id") restaurantId: Long,
+        @Query("activeOnly") activeOnly: Boolean = true
+    ): Response<List<MenuItemResponse>>
 
     @GET("/api/orders/client")
     suspend fun getMyOrders(): Response<List<Order>>
@@ -57,7 +60,7 @@ interface ApiService {
     suspend fun getMenuItemById(@Path("id") id: Long): Response<MenuItemResponse>
 
     // Order Actions
-    @retrofit2.http.PATCH("/api/restaurants/orders/{id}/accept")
+    @retrofit2.http.PUT("/api/orders/{id}/accept")
     suspend fun acceptOrder(@Path("id") id: Long): Response<Order>
 
     @retrofit2.http.PATCH("/api/restaurants/orders/{id}/prepare")
@@ -66,7 +69,7 @@ interface ApiService {
     @retrofit2.http.PATCH("/api/restaurants/orders/{id}/ready")
     suspend fun readyOrder(@Path("id") id: Long): Response<Order>
 
-    @retrofit2.http.PATCH("/api/restaurants/orders/{id}/reject")
+    @retrofit2.http.PUT("/api/orders/{id}/decline")
     suspend fun rejectOrder(@Path("id") id: Long, @Body reason: Map<String, String>): Response<Order>
 
     // Livreur Specific
@@ -79,6 +82,15 @@ interface ApiService {
     @GET("/api/deliveries/assigned")
     suspend fun getAssignedDeliveries(): Response<List<DeliveryResponse>>
     
+    @GET("/api/deliveries/requests")
+    suspend fun getAvailableDeliveryRequests(): Response<List<DeliveryResponse>>
+    
+    @retrofit2.http.PUT("/api/deliveries/requests/{id}/accept")
+    suspend fun acceptDeliveryRequest(@Path("id") id: Long): Response<DeliveryResponse>
+    
+    @retrofit2.http.PUT("/api/deliveries/requests/{id}/decline")
+    suspend fun declineDeliveryRequest(@Path("id") id: Long): Response<Void>
+    
     @GET("/api/deliveries/history")
     suspend fun getDeliveryHistory(): Response<List<DeliveryResponse>>
 
@@ -87,6 +99,16 @@ interface ApiService {
 
     @retrofit2.http.PATCH("/api/driver-locations")
     suspend fun updateLocation(@Body location: LocationUpdateDto): Response<Void>
+
+    // GPS Location Tracking
+    @POST("/api/orders/{orderId}/location")
+    suspend fun saveOrderLocation(
+        @Path("orderId") orderId: Long,
+        @Body location: LocationUpdateDto
+    ): Response<Void>
+
+    @GET("/api/orders/{orderId}/location")
+    suspend fun getOrderLocation(@Path("orderId") orderId: Long): Response<OrderLocationResponse>
 
     // Admin
     @GET("/api/admin/stats")

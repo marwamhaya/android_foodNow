@@ -29,6 +29,9 @@ class OrderDetailsFragment : Fragment(R.layout.fragment_order_details) {
         if (orderId == -1L) {
              return
         }
+        
+        // Ensure orders are loaded
+        viewModel.getOrders()
 
         val tvId = view.findViewById<TextView>(R.id.tvOrderId)
         val tvDate = view.findViewById<TextView>(R.id.tvOrderDate)
@@ -49,8 +52,8 @@ class OrderDetailsFragment : Fragment(R.layout.fragment_order_details) {
              if (order != null) {
                  tvId.text = "Order #${order.id}"
                  tvDate.text = "Date: ${order.createdAt}"
-                 tvStatus.text = "Status: ${order.status}"
-                 tvTotal.text = "Total: ${order.totalAmount} DH"
+                 tvStatus.text = order.status
+                 tvTotal.text = "${String.format("%.2f", order.totalAmount)} DH"
                  
                  // Update buttons based on status
                  updateButtons(order.status, btnAction1, btnAction2)

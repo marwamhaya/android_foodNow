@@ -17,23 +17,24 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_margin="16dp"
+        android:layout_marginTop="20dp"
         android:visibility="gone"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="4dp">
+        app:cardCornerRadius="25dp"
+        app:cardElevation="6dp">
 
         <TextView
             android:id="@+id/tvConnectionStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Connecting..."
-            android:textSize="12sp"
+            android:textSize="13sp"
+            android:textStyle="bold"
             android:textColor="#FFFFFF"
-            android:background="#FF9800"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"/>
+            android:background="#FFAB00"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"/>
     </androidx.cardview.widget.CardView>
 
     <!-- Bottom Info Card -->
@@ -42,108 +43,196 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_margin="16dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="12dp">
+        app:cardCornerRadius="24dp"
+        app:cardElevation="16dp"
+        app:cardBackgroundColor="#FFFFFF">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp"
-            android:background="#FFFFFF">
+            android:padding="24dp">
 
-            <!-- Title -->
-            <TextView
-                android:layout_width="wrap_content"
+            <!-- Title & Status Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Tracking Delivery"
-                android:textColor="#000000"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
+                
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Suivi de commande"
+                    android:textColor="#1A1A1A"
+                    android:textSize="22sp"
+                    android:textStyle="bold"/>
+                
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@android:drawable/ic_menu_info_details"
+                    app:tint="#666666"/>
+            </LinearLayout>
 
             <!-- Delivery Status Timeline -->
-            <LinearLayout
-                android:id="@+id/deliveryTimeline"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="16dp"
-                android:gravity="center_vertical">
-
-                <View
-                    android:id="@+id/timelineStep1"
-                    android:layout_width="0dp"
-                    android:layout_height="4dp"
-                    android:layout_weight="1"
-                    android:background="#4CAF50"/>
-
-                <View
-                    android:id="@+id/timelineStep2"
-                    android:layout_width="0dp"
-                    android:layout_height="4dp"
-                    android:layout_weight="1"
-                    android:background="#E0E0E0"/>
-
-                <View
-                    android:id="@+id/timelineStep3"
-                    android:layout_width="0dp"
-                    android:layout_height="4dp"
-                    android:layout_weight="1"
-                    android:background="#E0E0E0"/>
-            </LinearLayout>
-
-            <!-- Timeline Labels -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_marginBottom="16dp">
+                
+                <LinearLayout
+                    android:id="@+id/deliveryTimeline"
+                    android:layout_width="match_parent"
+                    android:layout_height="6dp"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="10dp">
 
-                <TextView
-                    android:layout_width="0dp"
+                    <View
+                        android:id="@+id/timelineStep1"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="#E0E0E0"
+                        android:layout_marginEnd="4dp"/>
+
+                    <View
+                        android:id="@+id/timelineStep2"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="#E0E0E0"
+                        android:layout_marginEnd="4dp"/>
+
+                    <View
+                        android:id="@+id/timelineStep3"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="#E0E0E0"
+                        android:layout_marginEnd="4dp"/>
+
+                    <View
+                        android:id="@+id/timelineStep4"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="#E0E0E0"
+                        android:layout_marginEnd="4dp"/>
+
+                    <View
+                        android:id="@+id/timelineStep5"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="#E0E0E0"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Confirmed"
-                    android:textSize="10sp"
-                    android:textColor="#666666"
-                    android:gravity="start"/>
+                    android:orientation="horizontal"
+                    android:layout_below="@id/deliveryTimeline"
+                    android:layout_marginTop="8dp">
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="On The Way"
-                    android:textSize="10sp"
-                    android:textColor="#666666"
-                    android:gravity="center"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Reçue"
+                        android:textSize="10sp"
+                        android:textColor="#888888"
+                        android:textStyle="bold"
+                        android:gravity="start"/>
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Delivered"
-                    android:textSize="10sp"
-                    android:textColor="#666666"
-                    android:gravity="end"/>
-            </LinearLayout>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Préparée"
+                        android:textSize="10sp"
+                        android:textColor="#888888"
+                        android:textStyle="bold"
+                        android:gravity="center"/>
 
-            <!-- Driver Info -->
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Livreur"
+                        android:textSize="10sp"
+                        android:textColor="#888888"
+                        android:textStyle="bold"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="En route"
+                        android:textSize="10sp"
+                        android:textColor="#888888"
+                        android:textStyle="bold"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Livrée"
+                        android:textSize="10sp"
+                        android:textColor="#888888"
+                        android:textStyle="bold"
+                        android:gravity="end"/>
+                </LinearLayout>
+            </RelativeLayout>
+
             <TextView
-                android:id="@+id/tvDriverInfo"
+                android:id="@+id/tvTrackingUnavailable"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Connecting to driver..."
-                android:textColor="#000000"
-                android:textSize="14sp"
-                android:layout_marginBottom="12dp"/>
+                android:text="Suivi en direct momentanément indisponible"
+                android:textColor="#D32F2F"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone"/>
+
+            <!-- Driver Info Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="12dp"
+                android:background="#F8F9FA"
+                android:layout_marginBottom="20dp"
+                android:clipToPadding="false">
+                
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@android:drawable/ic_menu_directions"
+                    app:tint="#007AFF"/>
+
+                <TextView
+                    android:id="@+id/tvDriverInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="En attente du livreur..."
+                    android:textColor="#333333"
+                    android:textSize="14sp"
+                    android:lineSpacingExtra="4dp"/>
+            </LinearLayout>
 
             <!-- Distance and ETA -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp">
+                android:orientation="horizontal">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -154,19 +243,28 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Distance"
-                        android:textSize="12sp"
-                        android:textColor="#999999"/>
+                        android:text="DISTANCE"
+                        android:textSize="10sp"
+                        android:textColor="#ADB5BD"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.1"/>
 
                     <TextView
                         android:id="@+id/tvDistance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="-- km"
-                        android:textSize="18sp"
+                        android:textSize="24sp"
                         android:textStyle="bold"
-                        android:textColor="#000000"/>
+                        android:textColor="#1A1A1A"/>
                 </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="40dp"
+                    android:background="#E9ECEF"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginHorizontal="16dp"/>
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -178,18 +276,20 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="ETA"
-                        android:textSize="12sp"
-                        android:textColor="#999999"/>
+                        android:text="ARRIVÉE PRÉVUE"
+                        android:textSize="10sp"
+                        android:textColor="#ADB5BD"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.1"/>
 
                     <TextView
                         android:id="@+id/tvETA"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="-- min"
-                        android:textSize="18sp"
+                        android:textSize="24sp"
                         android:textStyle="bold"
-                        android:textColor="#000000"/>
+                        android:textColor="#007AFF"/>
                 </LinearLayout>
             </LinearLayout>
 

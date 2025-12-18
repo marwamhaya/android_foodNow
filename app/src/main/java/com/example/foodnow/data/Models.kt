@@ -127,6 +127,10 @@ data class Order(
     val status: String,
     val totalAmount: BigDecimal,
     val createdAt: String,
+    val clientLatitude: Double? = null,
+    val clientLongitude: Double? = null,
+    val restaurantLatitude: Double? = null,
+    val restaurantLongitude: Double? = null,
     @SerializedName("orderItems")
     val items: List<OrderItem> = emptyList()
 )
@@ -142,7 +146,11 @@ data class DeliveryResponse(
     val status: String,
     val pickupTime: String?,
     val deliveryTime: String?,
-    val createdAt: String
+    val createdAt: String,
+    val clientLatitude: Double? = null,
+    val clientLongitude: Double? = null,
+    val restaurantLatitude: Double? = null,
+    val restaurantLongitude: Double? = null
 )
 
 data class LivreurResponse(
@@ -177,6 +185,7 @@ data class OrderItem(
     val quantity: Int,
     @SerializedName("unitPrice")
     val price: BigDecimal,
+    val menuItemImageUrl: String? = null,
     val selectedOptions: List<SelectedOptionResponse>? = emptyList()
 )
 
@@ -188,7 +197,9 @@ data class SelectedOptionResponse(
 data class OrderRequest(
     val restaurantId: Long,
     val items: List<OrderItemRequest>,
-    val deliveryAddress: String? = null
+    val deliveryAddress: String? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null
 )
 
 data class OrderItemRequest(

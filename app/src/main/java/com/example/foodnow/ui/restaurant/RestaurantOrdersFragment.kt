@@ -30,7 +30,11 @@ class RestaurantOrdersFragment : Fragment(R.layout.fragment_restaurant_orders) {
 
         val tvEmpty = view.findViewById<android.widget.TextView>(R.id.tvEmptyOrders)
         
-        adapter = RestaurantOrderAdapter(emptyList(), 
+        adapter = RestaurantOrderAdapter(emptyList(),
+            onItemClick = { order ->
+                val bundle = android.os.Bundle().apply { putLong("orderId", order.id) }
+                findNavController().navigate(R.id.action_orders_to_details, bundle)
+            },
             onAction1Click = { order ->
                 android.util.Log.d("RestaurantOrders", "Action 1 clicked for order ${order.id} with status ${order.status}")
                 val context = requireContext() // Ensure context is safe
@@ -58,9 +62,6 @@ class RestaurantOrdersFragment : Fragment(R.layout.fragment_restaurant_orders) {
                 viewModel.rejectOrder(order.id, "Declined by restaurant")
             }
         )
-        // Oops, I can't modify adapter callback behavior without changing adapter.
-        // Let's stick to existing logic for buttons, but how to see details?
-        // I'll modify Adapter to add `onItemClick`.
         
         recyclerView.adapter = adapter
         
@@ -72,6 +73,14 @@ class RestaurantOrdersFragment : Fragment(R.layout.fragment_restaurant_orders) {
             override fun onTabUnselected(tab: com.google.android.material.tabs.TabLayout.Tab?) {}
             override fun onTabReselected(tab: com.google.android.material.tabs.TabLayout.Tab?) {}
         })
+
+        viewModel.restaurant.observe(viewLifecycleOwner) { result ->
+            result.onSuccess { rest ->
+                rest.ownerId?.let { ownerId ->
+                    viewModel.startListeningForOrders(ownerId)
+                }
+            }
+        }
 
         viewModel.orders.observe(viewLifecycleOwner) { result ->
             result.onSuccess { orders ->
@@ -90,6 +99,7 @@ class RestaurantOrdersFragment : Fragment(R.layout.fragment_restaurant_orders) {
             }
         }
 
+        viewModel.getMyRestaurant()
         viewModel.getOrders()
     }
 

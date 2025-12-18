@@ -15,18 +15,43 @@ import com.example.foodnow.databinding.BottomSheetPaymentBinding
 import com.example.foodnow.utils.CartManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import java.math.BigDecimal
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import com.google.android.gms.location.*
+import androidx.appcompat.app.AlertDialog
+import androidx.activity.result.contract.ActivityResultContracts
 
 class PaymentBottomSheet(private val viewModel: MenuViewModel, private val restaurantId: Long) : BottomSheetDialogFragment() {
 
     private lateinit var binding: BottomSheetPaymentBinding
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var currentGPSLocation: android.location.Location? = null
+    private val PERMISSION_REQUEST_CODE = 2001
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            startLocationUpdates()
+        } else {
+            showBlockingPermissionDialog()
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = BottomSheetPaymentBinding.inflate(inflater, container, false)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.btnConfirmPayment.isEnabled = false
+        binding.tvGpsStatus.text = "🔍 Recherche de votre position GPS..."
+        
+        checkLocationPermission()
 
         val totalAmount = BigDecimal.valueOf(CartManager.getTotal())
         binding.tvPaymentAmount.text = "Amount to Pay: ${String.format("%.2f", totalAmount)} DH"
@@ -70,33 +95,57 @@ class PaymentBottomSheet(private val viewModel: MenuViewModel, private val resta
         }
     }
     
+    private fun checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) 
+            != PackageManager.PERMISSION_GRANTED) {
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        } else {
+            startLocationUpdates()
+        }
+    }
+
+
+    private fun showBlockingPermissionDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Permission Requise")
+            .setMessage("L'accès à votre position est obligatoire pour passer une commande et assurer une livraison précise.")
+            .setCancelable(false)
+            .setPositiveButton("Réessayer") { _, _ -> checkLocationPermission() }
+            .setNegativeButton("Annuler") { _, _ -> dismiss() }
+            .show()
+    }
+
+    private fun startLocationUpdates() {
+        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 2000)
+            .setWaitForAccurateLocation(true)
+            .setMinUpdateIntervalMillis(1000)
+            .setMaxUpdates(10) // Small burst to get fix
+            .build()
+
+        val locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                for (location in locationResult.locations) {
+                    currentGPSLocation = location
+                    binding.tvGpsStatus.text = "✅ Position GPS obtenue"
+                    binding.tvGpsStatus.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.holo_green_dark))
+                    binding.btnConfirmPayment.isEnabled = true
+                }
+            }
+        }
+
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) 
+            == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
+        }
+    }
+    
     private fun placeOrderWithLocation() {
-        try {
-            // Check location permission
-            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) 
-                != PackageManager.PERMISSION_GRANTED) {
-                // No permission - use default coordinates (0,0) or show error
-                Toast.makeText(context, "Location permission not granted. Using default location.", Toast.LENGTH_SHORT).show()
-                viewModel.placeOrder(restaurantId, 0.0, 0.0)
-                return
-            }
-            
-            // Get location
-            val locationManager = requireContext().getSystemService(android.content.Context.LOCATION_SERVICE) as LocationManager
-            val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-                ?: locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-            
-            if (location != null) {
-                viewModel.placeOrder(restaurantId, location.latitude, location.longitude)
-            } else {
-                // No location available - use default
-                Toast.makeText(context, "Unable to get current location. Using default.", Toast.LENGTH_SHORT).show()
-                viewModel.placeOrder(restaurantId, 0.0, 0.0)
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("PaymentBottomSheet", "Error getting location", e)
-            // Fallback to default location
-            viewModel.placeOrder(restaurantId, 0.0, 0.0)
+        val loc = currentGPSLocation
+        if (loc != null) {
+            viewModel.placeOrder(restaurantId, loc.latitude, loc.longitude)
+        } else {
+            Toast.makeText(context, "Erreur: GPS non disponible", Toast.LENGTH_LONG).show()
+            binding.btnConfirmPayment.isEnabled = true
         }
     }
 }

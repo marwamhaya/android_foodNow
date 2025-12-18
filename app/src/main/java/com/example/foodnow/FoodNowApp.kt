@@ -10,6 +10,10 @@ class FoodNowApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        
+        // OSMDroid configuration
+        org.osmdroid.config.Configuration.getInstance().userAgentValue = packageName
+        
         val tokenManager = TokenManager(this)
         val apiService = RetrofitClient.getInstance(tokenManager)
         repository = Repository(apiService, tokenManager)

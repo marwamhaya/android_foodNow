@@ -1,56 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="12dp"
-    android:gravity="center_vertical"
-    android:background="?attr/selectableItemBackground">
-
-    <TextView
-        android:id="@+id/tvQuantity"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:text="2x"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:background="@drawable/bg_quantity_selector"
-        android:textColor="@color/black"/>
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="1dp"
+    app:strokeColor="@color/divider"
+    app:strokeWidth="1dp">
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:layout_marginStart="12dp">
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/tvItemName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Pizza Margherita"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_primary"/>
+        <!-- Item Image -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivItemImage"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize8"
+            android:src="@drawable/ic_launcher_background"
+            android:background="@color/divider"/>
 
-        <TextView
-            android:id="@+id/tvItemDetails"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="+ Extra Cheese"
-            android:textSize="14sp"
-            android:textColor="@color/text_secondary"
-            android:visibility="gone"/>
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="12dp">
+
+            <!-- Item Name -->
+            <TextView
+                android:id="@+id/tvItemName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Soupe à l'oignon gratinée"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"/>
+
+            <!-- Price Calculation: Price × Quantity = Total -->
+            <TextView
+                android:id="@+id/tvPriceCalculation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="95,00 DH × 2 = 190,00 DH"
+                android:textSize="14sp"
+                android:textColor="@color/primary"
+                android:textStyle="bold"
+                android:layout_marginTop="4dp"/>
+
+            <!-- Supplements/Options -->
+            <TextView
+                android:id="@+id/tvItemDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="+ Supplément Fromage: +10,00 DH"
+                android:textSize="13sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="4dp"
+                android:visibility="gone"/>
+        </LinearLayout>
+
+        <!-- Hidden views for backward compatibility if any code still uses them -->
+        <TextView android:id="@+id/tvQuantity" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+        <TextView android:id="@+id/tvItemPrice" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+        <TextView android:id="@+id/tvItemDescription" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/tvItemPrice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="24.00 DH"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="@color/text_primary"/>
-
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

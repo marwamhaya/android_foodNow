@@ -11,6 +11,7 @@ import com.example.foodnow.data.Order
 
 class RestaurantOrderAdapter(
     private var orders: List<Order>,
+    private val onItemClick: (Order) -> Unit,
     private val onAction1Click: (Order) -> Unit,
     private val onAction2Click: (Order) -> Unit
 ) : RecyclerView.Adapter<RestaurantOrderAdapter.OrderViewHolder>() {
@@ -30,9 +31,9 @@ class RestaurantOrderAdapter(
 
     override fun onBindViewHolder(holder: OrderViewHolder, position: Int) {
         val order = orders[position]
-        holder.tvId.text = "Order #${order.id}"
-        holder.tvStatus.text = "Status: ${order.status}"
-        holder.tvPrice.text = "Total: $${order.totalAmount}"
+        holder.tvId.text = "Order ${order.id}"
+        holder.tvStatus.text = order.status
+        holder.tvPrice.text = "${String.format("%.2f", order.totalAmount)} DH"
 
         // Reset state for recycling
         holder.btnAction1.isEnabled = true
@@ -40,26 +41,41 @@ class RestaurantOrderAdapter(
         holder.btnAction2.isEnabled = true 
         holder.btnAction2.visibility = View.VISIBLE
 
-        // Configure buttons based on status
+        // Configure status background and buttons based on status
         when (order.status) {
             "PENDING" -> {
+                holder.tvStatus.setBackgroundResource(R.drawable.bg_status_pending)
                 holder.btnAction1.text = "Accept"
                 holder.btnAction2.text = "Reject"
             }
             "ACCEPTED" -> {
+                holder.tvStatus.setBackgroundResource(R.drawable.bg_status_accepted)
                 holder.btnAction1.text = "Prepare"
                 holder.btnAction2.visibility = View.GONE
             }
             "PREPARING" -> {
+                holder.tvStatus.setBackgroundResource(R.drawable.bg_status_preparing)
                 holder.btnAction1.text = "Ready"
                 holder.btnAction2.visibility = View.GONE
             }
-             "READY_FOR_PICKUP" -> {
+            "READY_FOR_PICKUP" -> {
+                holder.tvStatus.setBackgroundResource(R.drawable.bg_status_ready)
                 holder.btnAction1.text = "Waiting for Pickup"
-                holder.btnAction1.isEnabled = false // Wait for livreur
+                holder.btnAction1.isEnabled = false
+                holder.btnAction2.visibility = View.GONE
+            }
+            "DELIVERED" -> {
+                holder.tvStatus.setBackgroundResource(R.drawable.bg_status_ready)
+                holder.btnAction1.visibility = View.GONE
+                holder.btnAction2.visibility = View.GONE
+            }
+            "CANCELLED" -> {
+                holder.tvStatus.setBackgroundResource(R.drawable.bg_status_cancelled)
+                holder.btnAction1.visibility = View.GONE
                 holder.btnAction2.visibility = View.GONE
             }
             else -> {
+                holder.tvStatus.setBackgroundResource(R.drawable.bg_status_badge)
                 holder.btnAction1.visibility = View.GONE
                 holder.btnAction2.visibility = View.GONE
             }
@@ -72,6 +88,10 @@ class RestaurantOrderAdapter(
         holder.btnAction2.setOnClickListener { 
             android.widget.Toast.makeText(holder.itemView.context, "Clicked Action 2", android.widget.Toast.LENGTH_SHORT).show()
             onAction2Click(order) 
+        }
+        
+        holder.itemView.setOnClickListener {
+            onItemClick(order)
         }
     }
 

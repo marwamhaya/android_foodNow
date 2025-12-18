@@ -51,20 +51,18 @@ class MenuViewModel(private val repository: Repository) : ViewModel() {
 
         viewModelScope.launch {
             try {
-                val request = OrderRequest(restaurantId, items, "Default Delivery Address")
+                // Atomic request with GPS coordinates
+                val request = OrderRequest(
+                    restaurantId = restaurantId,
+                    items = items,
+                    deliveryAddress = "GPS-based Location",
+                    latitude = latitude,
+                    longitude = longitude
+                )
+                
                 val response = repository.createOrder(request)
                 if (response.isSuccessful && response.body() != null) {
                     val order = response.body()!!
-                    
-                    // Save client GPS location for this order
-                    try {
-                        val locationDto = com.example.foodnow.data.LocationUpdateDto(latitude, longitude)
-                        repository.saveOrderLocation(order.id, locationDto)
-                    } catch (e: Exception) {
-                        // Log but don't fail the order if location save fails
-                        android.util.Log.e("MenuViewModel", "Failed to save order location", e)
-                    }
-                    
                     _orderResult.value = Result.success(order)
                     CartManager.clearCart() // Clear global cart
                 } else {

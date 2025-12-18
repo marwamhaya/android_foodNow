@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import android.content.Context
 
 object RetrofitClient {
-    private const val BASE_URL = "http://100.79.107.106:8080/" // Physical device - Computer's local IP
+    private const val BASE_URL = Constants.BASE_URL
 
     fun getInstance(tokenManager: TokenManager): ApiService {
         val logging = HttpLoggingInterceptor().apply {
@@ -110,6 +110,8 @@ class Repository(private val apiService: ApiService, private val tokenManager: T
     }
     
     fun isLoggedIn(): Boolean = tokenManager.getToken() != null
+
+    fun getToken(): String? = tokenManager.getToken()
 
     fun getUserRole(): String? = tokenManager.getRole()
     

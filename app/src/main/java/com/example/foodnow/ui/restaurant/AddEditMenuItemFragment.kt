@@ -15,6 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.example.foodnow.FoodNowApp
+import com.example.foodnow.data.Constants
 import com.example.foodnow.R
 import com.example.foodnow.ui.ViewModelFactory
 import java.math.BigDecimal
@@ -52,14 +53,8 @@ class AddEditMenuItemFragment : Fragment(R.layout.fragment_add_edit_menu_item) {
         // Initialize Draft State
         if (savedInstanceState == null) {
             if (menuItemId != -1L) {
-                // If we are editing a DIFFERENT item than the one in draft, force reload
-                if (viewModel.getDraftId() != menuItemId) {
-                    viewModel.startEditing(menuItemId)
-                }
+                viewModel.startEditing(menuItemId)
             } else {
-                // If we are creating NEW, but draft is for EDIT (-1 vs >0), force reset
-                // Or if draft is dirty but we want a NEW one? 
-                // Using startCreating() check inside ViewModel handles "already creating".
                 viewModel.startCreating()
             }
         }
@@ -103,7 +98,7 @@ class AddEditMenuItemFragment : Fragment(R.layout.fragment_add_edit_menu_item) {
              
              // Image logic
              if (!draft.imageUrl.isNullOrEmpty()) {
-                  val fullUrl = if (draft.imageUrl.startsWith("http")) draft.imageUrl else "http://100.79.107.106:8080${draft.imageUrl}"
+                  val fullUrl = if (draft.imageUrl.startsWith("http")) draft.imageUrl else "${Constants.BASE_URL}${draft.imageUrl}"
                   Glide.with(this).load(fullUrl).into(ivImage)
              }
              

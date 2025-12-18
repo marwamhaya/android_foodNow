@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.foodnow.FoodNowApp
+import com.example.foodnow.data.Constants
 import com.example.foodnow.R
 import com.example.foodnow.ui.ViewModelFactory
 import androidx.navigation.fragment.findNavController
@@ -49,7 +50,7 @@ class RestaurantDashboardFragment : Fragment(R.layout.fragment_restaurant_dashbo
                 // Load restaurant image
                 if (!restaurant.imageUrl.isNullOrEmpty()) {
                     val fullUrl = if (restaurant.imageUrl.startsWith("http")) restaurant.imageUrl
-                                   else "http://100.79.107.106:8080${restaurant.imageUrl}"
+                                   else "${Constants.BASE_URL}api/restaurants/images/${restaurant.imageUrl}"
                     com.bumptech.glide.Glide.with(this)
                         .load(fullUrl)
                         .placeholder(android.R.drawable.ic_menu_gallery)

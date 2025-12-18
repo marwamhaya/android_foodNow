@@ -26,7 +26,7 @@ class AdminOrdersFragment : Fragment(R.layout.fragment_restaurant_orders) { // R
         val rv = view.findViewById<RecyclerView>(R.id.rvOrders)
         
         rv.layoutManager = LinearLayoutManager(context)
-        adapter = RestaurantOrderAdapter(emptyList(), {}, {}) // Actions disabled for Admin view only? Or allowed?
+        adapter = RestaurantOrderAdapter(emptyList(), {}, {}, {}) // Actions disabled for Admin view only? Or allowed?
         // If Admin can manage orders, pass actions. 
         // For now, pass empty lambdas (View Only).
         rv.adapter = adapter

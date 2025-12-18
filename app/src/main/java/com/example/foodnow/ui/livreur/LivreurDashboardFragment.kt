@@ -38,7 +38,10 @@ class LivreurDashboardFragment : Fragment(R.layout.fragment_livreur_dashboard) {
                     requireContext().startService(intent)
                     
                     // Then navigate to map immediately
-                    val bundle = Bundle().apply { putLong("delivery_id", delivery.id) }
+                    val bundle = Bundle().apply { 
+                        putLong("delivery_id", delivery.id)
+                        putLong("orderId", delivery.orderId)
+                    }
                     try {
                         findNavController().navigate(R.id.nav_active_delivery, bundle)
                     } catch (e: Exception) {
@@ -51,7 +54,10 @@ class LivreurDashboardFragment : Fragment(R.layout.fragment_livreur_dashboard) {
                 }
                 "PICKED_UP", "IN_DELIVERY", "ON_THE_WAY" -> {
                     // Navigate to Map
-                    val bundle = Bundle().apply { putLong("delivery_id", delivery.id) }
+                    val bundle = Bundle().apply { 
+                        putLong("delivery_id", delivery.id)
+                        putLong("orderId", delivery.orderId)
+                    }
                     try {
                         findNavController().navigate(R.id.nav_active_delivery, bundle)
                     } catch (e: Exception) {
@@ -100,6 +106,7 @@ class LivreurDashboardFragment : Fragment(R.layout.fragment_livreur_dashboard) {
 
         viewModel.getAssignedDeliveries()
         viewModel.getAvailableRequests()
+        viewModel.startListeningForDeliveries()
         
         // Auto-refresh?
     }

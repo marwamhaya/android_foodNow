@@ -15,11 +15,14 @@ import androidx.fragment.app.viewModels
 import com.example.foodnow.FoodNowApp
 import com.example.foodnow.R
 import com.example.foodnow.data.DeliveryResponse
-import com.example.foodnow.service.NominatimGeocodingService
 import com.example.foodnow.ui.ViewModelFactory
 import com.example.foodnow.ui.livreur.LivreurViewModel
 import com.example.foodnow.utils.MarkerAnimator
 import com.example.foodnow.utils.NavigationHelper
+import androidx.lifecycle.lifecycleScope
+import androidx.activity.result.contract.ActivityResultContracts
+import org.osmdroid.bonuspack.routing.OSRMRoadManager
+import org.osmdroid.bonuspack.routing.RoadManager
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,6 +52,11 @@ class TrackOrderFragment : Fragment(R.layout.fragment_track_order) {
     private lateinit var timelineStep1: View
     private lateinit var timelineStep2: View
     private lateinit var timelineStep3: View
+    private lateinit var timelineStep4: View
+    private lateinit var timelineStep5: View
+    
+    // UI Fallback
+    private lateinit var tvTrackingUnavailable: TextView
     
     private var stompClient: StompClient? = null
     private val gson = Gson()
@@ -59,6 +67,17 @@ class TrackOrderFragment : Fragment(R.layout.fragment_track_order) {
     private var lastDriverLocation: GeoPoint? = null
     private var updateJob: Job? = null
     private var reconnectAttempts = 0
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions.entries.all { it.value }
+        if (granted) {
+            Toast.makeText(context, "Location permission granted", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "Location permission denied", Toast.LENGTH_LONG).show()
+        }
+    }
     
     private val viewModel: LivreurViewModel by viewModels {
         ViewModelFactory((requireActivity().application as FoodNowApp).repository)
@@ -100,6 +119,9 @@ class TrackOrderFragment : Fragment(R.layout.fragment_track_order) {
         timelineStep1 = view.findViewById(R.id.timelineStep1)
         timelineStep2 = view.findViewById(R.id.timelineStep2)
         timelineStep3 = view.findViewById(R.id.timelineStep3)
+        timelineStep4 = view.findViewById(R.id.timelineStep4)
+        timelineStep5 = view.findViewById(R.id.timelineStep5)
+        tvTrackingUnavailable = view.findViewById(R.id.tvTrackingUnavailable)
     }
     
     private fun initializeMap() {
@@ -110,103 +132,32 @@ class TrackOrderFragment : Fragment(R.layout.fragment_track_order) {
     }
 
     private fun connectStomp() {
-        showConnectionStatus("Connecting...", "#FF9800")
-        
-        // Get auth token from TokenManager
-        val tokenManager = (requireActivity().application as FoodNowApp).repository.let {
-            // Access tokenManager through FoodNowApp
-            com.example.foodnow.data.TokenManager(requireContext())
-        }
-        val token = tokenManager.getToken()
-        
-        if (token.isNullOrEmpty()) {
-            Log.e(TAG, "No auth token available for WebSocket connection")
-            showConnectionStatus("Authentication Required", "#F44336")
-            Toast.makeText(context, "Please login again", Toast.LENGTH_LONG).show()
-            return
-        }
-        
-        val url = "ws://100.79.107.106:8080/ws-foodnow/websocket"
-        
-        // Create OkHttpClient with auth headers
-        val client = okhttp3.OkHttpClient.Builder()
-            .addInterceptor { chain ->
-                val original = chain.request()
-                val request = original.newBuilder()
-                    .header("Authorization", "Bearer $token")
-                    .build()
-                chain.proceed(request)
-            }
-            .build()
-        
-        stompClient = Stomp.over(Stomp.ConnectionProvider.OKHTTP, url, null, client)
-        
-        stompClient?.lifecycle()?.subscribe({ lifecycleEvent ->
-            when (lifecycleEvent.type) {
-                LifecycleEvent.Type.OPENED -> {
-                    requireActivity().runOnUiThread { 
-                        showConnectionStatus("Connected", "#4CAF50")
-                        reconnectAttempts = 0
-                        
-                        // Hide status after 2 seconds
-                        CoroutineScope(Dispatchers.Main).launch {
-                            delay(2000)
-                            cardConnectionStatus.visibility = View.GONE
-                        }
-                        
-                        Log.d(TAG, "WebSocket connected")
-                    }
-                }
-                LifecycleEvent.Type.ERROR -> {
-                    Log.e(TAG, "WebSocket error", lifecycleEvent.exception)
-                    requireActivity().runOnUiThread { 
-                        showConnectionStatus("Connection Error", "#F44336")
-                        handleConnectionLoss()
-                    }
-                }
-                LifecycleEvent.Type.CLOSED -> {
-                    Log.d(TAG, "WebSocket closed")
-                    requireActivity().runOnUiThread { 
-                        showConnectionStatus("Disconnected", "#F44336")
-                        handleConnectionLoss()
-                    }
-                }
-                else -> {}
-            }
-        }, { error ->
-            Log.e(TAG, "Lifecycle subscription error", error)
-        })
-
-        // Subscribe to location updates
+        val tokenManager = com.example.foodnow.data.TokenManager(requireContext())
+        val token = tokenManager.getToken() ?: return
         val orderId = arguments?.getLong("orderId") ?: 1L
+
+        com.example.foodnow.service.WebSocketService.connect(token)
         
-        stompClient?.topic("/topic/delivery/$orderId/location")?.subscribe({ topicMessage ->
-            val payload = topicMessage.payload
-            Log.d(TAG, "Location update received: $payload")
-            
+        // Subscribe to transient driver location: /topic/order/{orderId}/driver-location
+        com.example.foodnow.service.WebSocketService.subscribeToTopic("/topic/order/$orderId/driver-location", token) { payload ->
             try {
-                val location = gson.fromJson(payload, LocationUpdateDto::class.java)
+                val location = gson.fromJson(payload, com.example.foodnow.data.LocationUpdateDto::class.java)
                 requireActivity().runOnUiThread {
                     updateDriverLocation(location)
+                    showConnectionStatus("Live", "#4CAF50")
+                    tvTrackingUnavailable.visibility = View.GONE
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error parsing location update", e)
+                Log.e(TAG, "Parsing error", e)
             }
-        }, { error ->
-            Log.e(TAG, "Location subscription error", error)
-        })
-        
-        // Subscribe to status updates
-        stompClient?.topic("/topic/delivery/$orderId/status")?.subscribe({ topicMessage ->
-             requireActivity().runOnUiThread {
-                 updateDeliveryTimeline(topicMessage.payload)
-                 Log.d(TAG, "Status update: ${topicMessage.payload}")
-             }
-        }, { error ->
-            Log.e(TAG, "Status subscription error", error)
-        })
+        }
 
-        stompClient?.connect()
+        // Subscribe to status updates
+        com.example.foodnow.service.WebSocketService.subscribeToTopic("/topic/delivery/$orderId/status", token) { payload ->
+            requireActivity().runOnUiThread {
+                updateDeliveryTimeline(payload)
+            }
+        }
     }
     
     private fun showConnectionStatus(message: String, color: String) {
@@ -239,165 +190,209 @@ class TrackOrderFragment : Fragment(R.layout.fragment_track_order) {
     private fun checkAndRequestLocationPermission() {
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) 
             != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
-                LOCATION_PERMISSION_REQUEST_CODE
+            requestPermissionLauncher.launch(
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
             )
         }
     }
     
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(context, "Location permission granted", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(context, "Location permission denied", Toast.LENGTH_LONG).show()
-            }
-        }
-    }
     
     private fun fetchDeliveryDetails(orderId: Long) {
         viewModel.getAssignedDeliveries()
         viewModel.deliveries.observe(viewLifecycleOwner) { result ->
             result.onSuccess { deliveries ->
                 val delivery = deliveries.find { it.orderId == orderId }
-                delivery?.let {
-                    addClientMarker(it.clientAddress)
-                    tvDriverInfo.text = "Delivery to: ${it.clientName}\n${it.clientAddress}"
-                    updateDeliveryTimeline(it.status)
-                }
-            }
-        }
-    }
-    
-    private fun addClientMarker(address: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                Log.d(TAG, "Geocoding client address: $address")
-                val location = NominatimGeocodingService.geocode(address)
-                
-                if (location != null) {
-                    withContext(Dispatchers.Main) {
-                        val geoPoint = GeoPoint(location.latitude, location.longitude)
-                        clientLocation = geoPoint
-                        
-                        clientMarker = Marker(mapView)
-                        clientMarker?.position = geoPoint
-                        clientMarker?.title = "Delivery Location"
-                        clientMarker?.snippet = address
-                        clientMarker?.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                        clientMarker?.icon = resources.getDrawable(android.R.drawable.ic_dialog_map, null)
-                        mapView.overlays.add(clientMarker)
-                        
-                        // Center on client location initially
-                        mapView.controller.setCenter(geoPoint)
-                        mapView.invalidate()
-                        
-                        Log.d(TAG, "Client marker added at: ${location.latitude}, ${location.longitude}")
+                delivery?.let { del ->
+                    // Centering logic: Center on restaurant first
+                    if (del.restaurantLatitude != null && del.restaurantLongitude != null) {
+                        val restaurantLoc = GeoPoint(del.restaurantLatitude, del.restaurantLongitude)
+                        mapView.controller.setCenter(restaurantLoc)
+                        addRestaurantMarker(restaurantLoc, del.restaurantName)
                     }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "Unable to locate delivery address", Toast.LENGTH_LONG).show()
-                        Log.w(TAG, "Geocoding returned null for: $address")
+
+                    if (clientLocation == null && del.clientLatitude != null && del.clientLongitude != null) {
+                        val geoPoint = GeoPoint(del.clientLatitude, del.clientLongitude)
+                        addClientMarkerAt(geoPoint, del.clientAddress)
                     }
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Geocoding failed for: $address", e)
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Error locating address", Toast.LENGTH_SHORT).show()
+                    tvDriverInfo.text = "Commande de: ${del.clientName}\n${del.clientAddress}"
+                    updateDeliveryTimeline(del.status)
                 }
             }
         }
     }
 
-    private fun updateDriverLocation(location: LocationUpdateDto) {
+    private fun addRestaurantMarker(loc: GeoPoint, name: String) {
+         val marker = Marker(mapView)
+         marker.position = loc
+         marker.title = name
+         marker.icon = resources.getDrawable(R.drawable.ic_restaurant_24, null)
+         mapView.overlays.add(marker)
+         mapView.invalidate()
+    }
+    
+    private fun addClientMarkerAt(geoPoint: GeoPoint, address: String) {
+        clientLocation = geoPoint
+        
+        if (clientMarker == null) {
+            clientMarker = Marker(mapView)
+            clientMarker?.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+            clientMarker?.icon = resources.getDrawable(android.R.drawable.ic_dialog_map, null)
+            mapView.overlays.add(clientMarker)
+        }
+        
+        clientMarker?.position = geoPoint
+        clientMarker?.title = "Delivery Location"
+        clientMarker?.snippet = address
+        
+        // Center on client location initially
+        mapView.controller.setCenter(geoPoint)
+        mapView.invalidate()
+        
+        Log.d(TAG, "Client marker added at: ${geoPoint.latitude}, ${geoPoint.longitude}")
+    }
+
+    private fun updateDriverLocation(location: com.example.foodnow.data.LocationUpdateDto) {
         val newPosition = GeoPoint(location.latitude, location.longitude)
         
         if (driverMarker == null) {
-            // Create marker on first update
             driverMarker = Marker(mapView)
-            driverMarker?.title = "Driver"
-            driverMarker?.snippet = "Your delivery is on the way"
-            driverMarker?.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+            driverMarker?.title = "Livreur"
+            driverMarker?.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+            driverMarker?.icon = resources.getDrawable(R.drawable.ic_delivery_dining_24, null)
             mapView.overlays.add(driverMarker)
             driverMarker?.position = newPosition
+            
+            // First time we get location, hide "Connecting" if it was orange
+            cardConnectionStatus.visibility = View.GONE
         } else {
-            // Animate marker to new position
             driverMarker?.let { marker ->
-                MarkerAnimator.animateMarkerToPosition(marker, newPosition, mapView, 1000L)
+                MarkerAnimator.animateMarkerToPosition(marker, newPosition, mapView, 2000L)
             }
         }
         
         lastDriverLocation = newPosition
-        
-        // Update route line
         updateRouteLine(newPosition)
-        
-        // Update distance and ETA
         updateDistanceAndETA(newPosition)
         
-        // Auto-follow driver with smooth camera movement
-        MarkerAnimator.animateCameraToPosition(mapView, newPosition, duration = 1500L)
+        // Zoom to fit both if it's the first time or they are far apart
+        if (reconnectAttempts == 0) {
+            zoomToBoundingBox()
+        }
         
-        Log.d(TAG, "Driver location updated: ${location.latitude}, ${location.longitude}")
+        Log.d(TAG, "Driver position updated: ${location.latitude}, ${location.longitude}")
+    }
+
+    private fun zoomToBoundingBox() {
+        val driverPos = lastDriverLocation ?: return
+        val clientPos = clientLocation ?: return
+        val points = arrayListOf(driverPos, clientPos)
+        val box = org.osmdroid.util.BoundingBox.fromGeoPoints(points)
+        mapView.zoomToBoundingBox(box.increaseByScale(1.4f), true, 100)
     }
     
     private fun updateRouteLine(driverPosition: GeoPoint) {
-        clientLocation?.let { clientGeo ->
-            if (routeLine == null) {
-                routeLine = Polyline()
-                routeLine?.outlinePaint?.color = Color.BLUE
-                routeLine?.outlinePaint?.strokeWidth = 10f
-                mapView.overlays.add(0, routeLine) // Add at index 0 so it's below markers
+        val clientGeo = clientLocation ?: return
+        
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val roadManager = OSRMRoadManager(requireContext(), "FoodNowApp/1.0")
+                val road = roadManager.getRoad(arrayListOf(driverPosition, clientGeo))
+                
+                withContext(Dispatchers.Main) {
+                    if (road.mStatus == org.osmdroid.bonuspack.routing.Road.STATUS_OK) {
+                        routeLine?.let { mapView.overlays.remove(it) }
+                        routeLine = RoadManager.buildRoadOverlay(road)
+                        routeLine?.outlinePaint?.color = Color.parseColor("#007AFF")
+                        routeLine?.outlinePaint?.strokeWidth = 12f
+                        mapView.overlays.add(0, routeLine)
+                        
+                        updateDistanceAndETAFromRoad(road)
+                        mapView.invalidate()
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Route update error", e)
+                // Fallback to straight line on error
+                withContext(Dispatchers.Main) {
+                    drawStraightLine(driverPosition, clientGeo)
+                }
             }
-            
-            // Update route points (simple straight line for now)
-            val points = listOf(driverPosition, clientGeo)
-            routeLine?.setPoints(points)
-            
-            mapView.invalidate()
+        }
+    }
+
+    private fun drawStraightLine(start: GeoPoint, end: GeoPoint) {
+        if (routeLine == null) {
+            routeLine = Polyline()
+            routeLine?.outlinePaint?.color = Color.BLUE
+            routeLine?.outlinePaint?.strokeWidth = 8f
+            mapView.overlays.add(0, routeLine)
+        }
+        routeLine?.setPoints(listOf(start, end))
+        mapView.invalidate()
+    }
+    
+    private fun updateDistanceAndETAFromRoad(road: org.osmdroid.bonuspack.routing.Road) {
+        val distanceKm = road.mLength
+        val durationMin = (road.mDuration / 60.0).toInt()
+        
+        tvDistance.text = NavigationHelper.formatDistance(distanceKm)
+        tvETA.text = NavigationHelper.formatETA(durationMin)
+        
+        if (distanceKm < 0.5) {
+            tvDriverInfo.text = "Le livreur arrive !"
+        } else {
+            tvDriverInfo.text = "Livreur en route vers vous (${NavigationHelper.formatDistance(distanceKm)})"
         }
     }
     
     private fun updateDistanceAndETA(driverPosition: GeoPoint) {
-        clientLocation?.let { clientGeo ->
-            val distance = NavigationHelper.calculateDistance(driverPosition, clientGeo)
-            val eta = NavigationHelper.calculateETA(distance)
-            
-            tvDistance.text = NavigationHelper.formatDistance(distance)
-            tvETA.text = NavigationHelper.formatETA(eta)
-            
-            // Update driver info with proximity message
-            if (distance < 0.5) {
-                tvDriverInfo.text = "Driver is arriving soon!"
-            } else if (distance < 2.0) {
-                tvDriverInfo.text = "Driver is ${NavigationHelper.formatDistance(distance)} away"
-            } else {
-                tvDriverInfo.text = "Driver is on the way"
-            }
+        // This is now handled by updateDistanceAndETAFromRoad within updateRouteLine
+        // but keeping it as fallback for initial calculation
+        if (tvDistance.text.isEmpty()) {
+            val dist = NavigationHelper.calculateDistance(driverPosition, clientLocation ?: return)
+            tvDistance.text = NavigationHelper.formatDistance(dist)
+            tvETA.text = NavigationHelper.formatETA(NavigationHelper.calculateETA(dist))
         }
     }
     
     private fun updateDeliveryTimeline(status: String) {
-        // Reset all steps
-        timelineStep1.setBackgroundColor(Color.parseColor("#E0E0E0"))
-        timelineStep2.setBackgroundColor(Color.parseColor("#E0E0E0"))
-        timelineStep3.setBackgroundColor(Color.parseColor("#E0E0E0"))
+        val activeColor = Color.parseColor("#4CAF50")
+        val inactiveColor = Color.parseColor("#E0E0E0")
         
-        // Update based on status
+        // Reset steps
+        listOf(timelineStep1, timelineStep2, timelineStep3, timelineStep4, timelineStep5).forEach { 
+            it?.setBackgroundColor(inactiveColor) 
+        }
+        
         when (status.uppercase()) {
-            "PENDING", "DELIVERY_ACCEPTED", "READY_FOR_PICKUP" -> {
-                timelineStep1.setBackgroundColor(Color.parseColor("#4CAF50"))
+            "CREATED", "PENDING" -> {
+                timelineStep1.setBackgroundColor(activeColor)
+                tvDriverInfo.text = "Commande reçue"
             }
-            "PICKED_UP", "IN_DELIVERY", "ON_THE_WAY" -> {
-                timelineStep1.setBackgroundColor(Color.parseColor("#4CAF50"))
-                timelineStep2.setBackgroundColor(Color.parseColor("#4CAF50"))
+            "ACCEPTED", "RESTAURANT_ACCEPTED" -> {
+                timelineStep1.setBackgroundColor(activeColor)
+                timelineStep2.setBackgroundColor(activeColor)
+                tvDriverInfo.text = "Restaurant prépare votre commande"
+            }
+            "DRIVER_ASSIGNED", "READY_FOR_PICKUP", "PICKED_UP", "DELIVERY_ACCEPTED" -> {
+                timelineStep1.setBackgroundColor(activeColor)
+                timelineStep2.setBackgroundColor(activeColor)
+                timelineStep3.setBackgroundColor(activeColor)
+                tvDriverInfo.text = "Livreur en route vers le restaurant"
+            }
+            "ON_THE_WAY", "IN_DELIVERY" -> {
+                timelineStep1.setBackgroundColor(activeColor)
+                timelineStep2.setBackgroundColor(activeColor)
+                timelineStep3.setBackgroundColor(activeColor)
+                timelineStep4.setBackgroundColor(activeColor)
+                tvDriverInfo.text = "Livreur en route vers vous !"
             }
             "DELIVERED", "COMPLETED" -> {
-                timelineStep1.setBackgroundColor(Color.parseColor("#4CAF50"))
-                timelineStep2.setBackgroundColor(Color.parseColor("#4CAF50"))
-                timelineStep3.setBackgroundColor(Color.parseColor("#4CAF50"))
+                listOf(timelineStep1, timelineStep2, timelineStep3, timelineStep4, timelineStep5).forEach { 
+                    it?.setBackgroundColor(activeColor) 
+                }
+                tvDriverInfo.text = "Commande livrée. Bon appétit !"
+                tvTrackingUnavailable.visibility = View.GONE
             }
         }
     }
@@ -445,6 +440,4 @@ class TrackOrderFragment : Fragment(R.layout.fragment_track_order) {
         super.onLowMemory()
     }
     
-    // Helper DTO for internal use
-    data class LocationUpdateDto(val latitude: Double, val longitude: Double)
 }

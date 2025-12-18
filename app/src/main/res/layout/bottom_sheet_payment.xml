@@ -55,6 +55,25 @@
 
     </RadioGroup>
 
+    <TextView
+        android:id="@+id/tvGpsStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="📡 Recheche de votre position GPS..."
+        android:textColor="@color/primary"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Une position précise est requise pour la livraison."
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"/>
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnConfirmPayment"
         android:layout_width="match_parent"

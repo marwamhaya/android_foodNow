@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodnow.R
+import com.example.foodnow.data.Constants
 import com.example.foodnow.data.MenuItemResponse
 
 class MenuItemAdapter(
@@ -21,7 +22,6 @@ class MenuItemAdapter(
         val tvPrice: TextView = itemView.findViewById(R.id.tvMenuItemPrice)
         val tvDesc: TextView = itemView.findViewById(R.id.tvMenuItemDesc)
         val ivImage: android.widget.ImageView = itemView.findViewById(R.id.ivMenuItemImage)
-        val btnEdit: Button = itemView.findViewById(R.id.btnEdit)
         val btnDelete: android.widget.ImageButton = itemView.findViewById(R.id.btnDelete)
     }
 
@@ -38,13 +38,12 @@ class MenuItemAdapter(
         
         if (!item.imageUrl.isNullOrEmpty()) {
             val fullUrl = if (item.imageUrl!!.startsWith("http")) item.imageUrl 
-                           else "http://100.79.107.106:8080${item.imageUrl}"
+                           else "${Constants.BASE_URL}api/menu-items/images/${item.imageUrl}"
             com.bumptech.glide.Glide.with(holder.itemView.context).load(fullUrl).into(holder.ivImage)
         } else {
             holder.ivImage.setImageResource(R.drawable.ic_launcher_background) // Placeholder
         }
 
-        holder.btnEdit.setOnClickListener { onEditClick(item) }
         holder.btnDelete.setOnClickListener { onDeleteClick(item) }
         holder.itemView.setOnClickListener { onItemClick(item) }
     }

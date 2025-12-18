@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.foodnow.data.Repository
 
 class ViewModelFactory(private val repository: Repository) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(com.example.foodnow.ui.login.LoginViewModel::class.java)) {
             return com.example.foodnow.ui.login.LoginViewModel(repository) as T

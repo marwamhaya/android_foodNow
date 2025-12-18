@@ -10,6 +10,9 @@
     <color name="surface">#FFFFFF</color>
     <color name="error">#FF3B30</color>
     <color name="success">#34C759</color>
+    <color name="warning">#FF9500</color>
+    <color name="info">#007AFF</color>
+    <color name="info_dark">#5856D6</color>
 
     <color name="text_primary">#1A1D26</color>
     <color name="text_secondary">#9A9FAE</color>

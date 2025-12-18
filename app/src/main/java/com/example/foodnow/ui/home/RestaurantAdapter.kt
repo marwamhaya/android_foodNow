@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.foodnow.R
+import com.example.foodnow.data.Constants
 import com.example.foodnow.data.RestaurantResponse
 
 class RestaurantAdapter(
@@ -33,7 +34,7 @@ class RestaurantAdapter(
         
         if (!restaurant.imageUrl.isNullOrEmpty()) {
             val fullUrl = if (restaurant.imageUrl.startsWith("http")) restaurant.imageUrl 
-                           else "http://100.79.107.106:8080${restaurant.imageUrl}"
+                           else "${Constants.BASE_URL}${restaurant.imageUrl}"
             Glide.with(holder.itemView.context)
                 .load(fullUrl)
                 .placeholder(android.R.drawable.ic_menu_gallery)

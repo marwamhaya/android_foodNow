@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.foodnow.FoodNowApp
+import com.example.foodnow.data.Constants
 import com.example.foodnow.R
 import com.example.foodnow.ui.ViewModelFactory
 
@@ -53,7 +54,7 @@ class MenuItemDetailsFragment : Fragment(R.layout.fragment_menu_item_details) {
             // Image
             if (!item.imageUrl.isNullOrEmpty()) {
                 val fullUrl = if (item.imageUrl.startsWith("http")) item.imageUrl
-                else "http://100.79.107.106:8080${item.imageUrl}"
+                else "${Constants.BASE_URL}${item.imageUrl}"
                 Glide.with(this).load(fullUrl).into(ivImage)
             }
 

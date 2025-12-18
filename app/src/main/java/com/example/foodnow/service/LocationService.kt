@@ -10,12 +10,11 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
-import android.location.LocationManager
 import android.os.Build
-import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import com.google.android.gms.location.*
 import androidx.core.app.NotificationCompat
 import com.example.foodnow.FoodNowApp
 import com.example.foodnow.R
@@ -25,8 +24,8 @@ import kotlinx.coroutines.launch
 
 class LocationService : Service() {
 
-    private lateinit var locationManager: LocationManager
-    private var locationListener: LocationListener? = null
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var locationCallback: LocationCallback? = null
     private val scope = CoroutineScope(Dispatchers.IO)
 
     private var activeOrderId: Long? = null
@@ -38,13 +37,14 @@ class LocationService : Service() {
                 Log.d("LocationService", "Started tracking for order: $activeOrderId")
             }
         }
-        WebSocketService.connect()
+        val token = (application as FoodNowApp).repository.getToken()
+        WebSocketService.connect(token)
         return START_STICKY
     }
 
     override fun onCreate() {
         super.onCreate()
-        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         
         createNotificationChannel()
         startForeground(1, createNotification())
@@ -59,43 +59,22 @@ class LocationService : Service() {
             return
         }
 
-        locationListener = object : LocationListener {
-            override fun onLocationChanged(location: Location) {
-                sendLocationUpdate(location)
-            }
+        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 4000)
+            .setWaitForAccurateLocation(false)
+            .setMinUpdateIntervalMillis(2000)
+            .build()
 
-            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
-            override fun onProviderEnabled(provider: String) {
-                Log.d("LocationService", "Provider enabled: $provider")
-            }
-            override fun onProviderDisabled(provider: String) {
-                Log.w("LocationService", "Provider disabled: $provider")
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                locationResult.lastLocation?.let { sendLocationUpdate(it) }
             }
         }
 
         try {
-            // Request updates from GPS provider
-            // Reduced interval for smoother real-time tracking
-            locationManager.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER,
-                2500L, // 2.5 seconds (reduced from 5s)
-                5f,    // 5 meters (reduced from 10m)
-                locationListener!!
-            )
-            
-            // Also request from network provider as fallback
-            if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                locationManager.requestLocationUpdates(
-                    LocationManager.NETWORK_PROVIDER,
-                    2500L,
-                    5f,
-                    locationListener!!
-                )
-            }
-            
-            Log.d("LocationService", "Location updates started")
-        } catch (e: SecurityException) {
-            Log.e("LocationService", "Security exception starting location updates", e)
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback!!, null)
+            Log.d("LocationService", "Fused location updates started")
+        } catch (e: Exception) {
+            Log.e("LocationService", "Error starting fused location updates", e)
         }
     }
 
@@ -107,7 +86,8 @@ class LocationService : Service() {
                 // Send to WebSocket if order is active
                 activeOrderId?.let { orderId ->
                     if (orderId != -1L) {
-                        WebSocketService.sendLocation(orderId, location.latitude, location.longitude)
+                        val token = (application as FoodNowApp).repository.getToken()
+                        WebSocketService.sendLocation(orderId, location.latitude, location.longitude, token)
                     }
                 }
 
@@ -143,8 +123,8 @@ class LocationService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        locationListener?.let {
-            locationManager.removeUpdates(it)
+        locationCallback?.let {
+            fusedLocationClient.removeLocationUpdates(it)
         }
         WebSocketService.disconnect()
         Log.d("LocationService", "Location tracking stopped")

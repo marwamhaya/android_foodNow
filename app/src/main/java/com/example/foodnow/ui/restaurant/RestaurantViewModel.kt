@@ -11,6 +11,7 @@ import com.example.foodnow.data.RestaurantResponse
 
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.asRequestBody
 
 class RestaurantViewModel(private val repository: Repository) : ViewModel() {
 
@@ -79,19 +80,38 @@ class RestaurantViewModel(private val repository: Repository) : ViewModel() {
         
         val item = _menuItems.value?.getOrNull()?.find { it.id == id }
         if (item != null) {
-            _draftId = id
-            _draftImageUri = null
-            _draftMenuItem.value = MenuItemRequest(
-                name = item.name,
-                description = item.description,
-                price = item.price,
-                imageUrl = item.imageUrl,
-                category = item.category,
-                isAvailable = item.isAvailable,
-                optionGroups = item.optionGroups
-            )
+            setupDraftFromItem(item)
+        } else {
+            // Fetch from API if not in cache
+            viewModelScope.launch {
+                try {
+                    val response = repository.getMenuItemById(id)
+                    if (response.isSuccessful && response.body() != null) {
+                        setupDraftFromItem(response.body()!!)
+                    } else {
+                        _validationError.value = "Failed to load item for editing"
+                    }
+                } catch (e: Exception) {
+                    _validationError.value = "Error loading item: ${e.message}"
+                }
+            }
         }
+    }
+
+    private fun setupDraftFromItem(item: com.example.foodnow.data.MenuItemResponse) {
+        _draftId = item.id
+        _draftImageUri = null
+        _draftMenuItem.value = MenuItemRequest(
+            name = item.name,
+            description = item.description,
+            price = item.price,
+            imageUrl = item.imageUrl,
+            category = item.category,
+            isAvailable = item.isAvailable,
+            optionGroups = item.optionGroups
+        )
         _validationError.value = null
+        _saveStatus.value = Result.success(false)
     }
     
     fun updateDraft(name: String, desc: String, priceStr: String, category: String, isAvailable: Boolean) {
@@ -151,7 +171,7 @@ class RestaurantViewModel(private val repository: Repository) : ViewModel() {
                      val file = java.io.File(context.cacheDir, "temp_upload.jpg")
                      java.io.FileOutputStream(file).use { it.write(inputStream?.readBytes()) }
                      val mediaType = "image/*".toMediaTypeOrNull()
-                     val requestFile = okhttp3.RequestBody.create(mediaType, file)
+                     val requestFile = file.asRequestBody(mediaType)
                      val body = okhttp3.MultipartBody.Part.createFormData("file", file.name, requestFile)
                      
                      if (currentRestaurantId == null) {
@@ -178,8 +198,9 @@ class RestaurantViewModel(private val repository: Repository) : ViewModel() {
                          if (_draftImageUri != null) {
                              uploadImageForMenuItem(context, createdId, _draftImageUri!!)
                          } else {
-                             _saveStatus.value = Result.success(true)
-                             getMenuItems()
+                              _saveStatus.value = Result.success(true)
+                              clearDraft()
+                              getMenuItems()
                          }
                     } else {
                         _saveStatus.value = Result.failure(Exception("Creation failed: ${createResponse.code()}"))
@@ -195,6 +216,7 @@ class RestaurantViewModel(private val repository: Repository) : ViewModel() {
                              uploadImageForMenuItem(context, _draftId, _draftImageUri!!)
                          } else {
                              _saveStatus.value = Result.success(true)
+                             clearDraft()
                              getMenuItems()
                          }
                     } else {
@@ -213,14 +235,15 @@ class RestaurantViewModel(private val repository: Repository) : ViewModel() {
              val file = java.io.File(context.cacheDir, "upload_$id.jpg")
              java.io.FileOutputStream(file).use { it.write(inputStream?.readBytes()) }
              val mediaType = "image/*".toMediaTypeOrNull()
-             val requestFile = okhttp3.RequestBody.create(mediaType, file)
+             val requestFile = file.asRequestBody(mediaType)
              val body = okhttp3.MultipartBody.Part.createFormData("file", file.name, requestFile)
              
              val response = repository.uploadMenuItemImage(id, body)
-             if (response.isSuccessful) {
-                 _saveStatus.value = Result.success(true)
-                 getMenuItems()
-             } else {
+              if (response.isSuccessful) {
+                  _saveStatus.value = Result.success(true)
+                  clearDraft()
+                  getMenuItems()
+              } else {
                  _saveStatus.value = Result.failure(Exception("Image Upload failed: ${response.code()}"))
              }
          } catch (e: Exception) {
@@ -497,6 +520,13 @@ class RestaurantViewModel(private val repository: Repository) : ViewModel() {
             } catch (e: Exception) {
                 _passwordChangeStatus.value = Result.failure(e)
             }
+        }
+    }
+
+    fun startListeningForOrders(ownerId: Long) {
+        val token = repository.getToken() ?: return
+        com.example.foodnow.service.WebSocketService.subscribeToRestaurantOrders(ownerId, token) {
+            getOrders()
         }
     }
 }

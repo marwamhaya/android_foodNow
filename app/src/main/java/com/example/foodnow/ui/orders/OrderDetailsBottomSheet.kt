@@ -5,16 +5,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.ImageView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodnow.R
 import com.example.foodnow.data.Order
+import com.example.foodnow.FoodNowApp
+import com.example.foodnow.data.Constants
 import com.example.foodnow.data.OrderItem
 import com.example.foodnow.databinding.BottomSheetOrderDetailsBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import androidx.navigation.fragment.findNavController
 import com.example.foodnow.ui.orders.TrackOrderFragment
+import com.bumptech.glide.Glide
 import java.math.BigDecimal
+import java.util.Locale
 
 class OrderDetailsBottomSheet(private val order: Order) : BottomSheetDialogFragment() {
 
@@ -74,9 +79,10 @@ class OrderDetailsBottomSheet(private val order: Order) : BottomSheetDialogFragm
 class OrderItemsAdapter(private val items: List<OrderItem>) : RecyclerView.Adapter<OrderItemsAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val ivItemImage: ImageView = view.findViewById(R.id.ivItemImage)
         val tvItemName: TextView = view.findViewById(R.id.tvItemName)
         val tvItemDetails: TextView = view.findViewById(R.id.tvItemDetails)
-        val tvItemPrice: TextView = view.findViewById(R.id.tvItemPrice)
+        val tvPriceCalculation: TextView = view.findViewById(R.id.tvPriceCalculation)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -87,37 +93,40 @@ class OrderItemsAdapter(private val items: List<OrderItem>) : RecyclerView.Adapt
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
-        holder.tvItemName.text = "${item.quantity}x ${item.menuItemName}"
         
-        // Show supplements with prices if any
+        // Name
+        holder.tvItemName.text = item.menuItemName
+        
+        // Image
+        if (!item.menuItemImageUrl.isNullOrEmpty()) {
+            val fullUrl = if (item.menuItemImageUrl.startsWith("http")) item.menuItemImageUrl 
+                           else "${Constants.BASE_URL}api/menu-items/images/${item.menuItemImageUrl}"
+            Glide.with(holder.itemView.context).load(fullUrl).into(holder.ivItemImage)
+        } else {
+            holder.ivItemImage.setImageResource(android.R.drawable.ic_menu_gallery)
+        }
+        
+        // Price Calculation: "95,00 DH × 2 = 190,00 DH"
+        val unitPrice = item.price
+        val quantity = item.quantity
+        val total = unitPrice.multiply(BigDecimal(quantity))
+        
+        val unitPriceStr = String.format(Locale.FRANCE, "%.2f", unitPrice)
+        val totalStr = String.format(Locale.FRANCE, "%.2f", total)
+        
+        holder.tvPriceCalculation.text = "$totalStr DH (Qty: $quantity)"
+        
+        // Show supplements/options if any
         if (!item.selectedOptions.isNullOrEmpty()) {
             holder.tvItemDetails.visibility = View.VISIBLE
-            val detailsText = item.selectedOptions.joinToString(", ") { 
-                "${it.name} (+${String.format("%.2f", it.price)} DH)" 
+            val supplementsText = item.selectedOptions.joinToString("\n") { 
+                val optPriceStr = String.format(Locale.FRANCE, "%.2f", it.price)
+                "+ ${it.name}: +$optPriceStr DH" 
             }
-            holder.tvItemDetails.text = "• $detailsText"
+            holder.tvItemDetails.text = supplementsText
         } else {
             holder.tvItemDetails.visibility = View.GONE
         }
-        
-        // Calculate total price for item including supplements
-        // Ideally backend provides this or we act as if price is unit price * qty
-        // But backend subtotal is already calculated. 
-        // Wait, OrderItem in Models.kt has 'price: BigDecimal'. 
-        // In API Service (OrderController) -> OrderService -> mapToOrderItemResponse -> sets 'unitPrice' to OrderItemResponse.unitPrice.
-        // Android OrderItem 'price' maps to JSON 'unitPrice' or 'subtotal'?
-        // Looking at Models.kt: data class OrderItem(..., val price: BigDecimal, ...).
-        // Looking at JSON Mapping, if Gson is used, name must match.
-        // OrderItemResponse has 'unitPrice' and 'subtotal'. Models.kt OrderItem has 'price'.
-        // This is a mismatch unless SerializedName is used.
-        // CartManager uses menuItem.price.
-        // Let's assume 'price' in OrderItem is just the unit price for now or the subtotal?
-        // Let's look at `item_order_detail.xml` view which uses `tvItemPrice`.
-        // The user wants "Total Price of item".
-        // If I use the price from the model, I should multiply by quantity.
-
-        val totalPrice = item.price.multiply(java.math.BigDecimal(item.quantity))
-        holder.tvItemPrice.text = "${String.format("%.2f", totalPrice)} DH"
     }
 
     override fun getItemCount() = items.size

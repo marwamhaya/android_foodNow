@@ -131,4 +131,12 @@ class LivreurViewModel(private val repository: Repository) : ViewModel() {
             }
         }
     }
+    fun getToken(): String? = repository.getToken()
+
+    fun startListeningForDeliveries() {
+        val token = repository.getToken() ?: return
+        com.example.foodnow.service.WebSocketService.subscribeToAvailableDeliveries(token) {
+            getAvailableRequests()
+        }
+    }
 }
